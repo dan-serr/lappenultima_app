@@ -26,6 +26,7 @@ class _LoginState extends State<Login> {
   String? refreshToken;
 
   bool _isBusy = false;
+  bool _passwordVisible = true;
 
   @override
   void initState() {
@@ -70,14 +71,21 @@ class _LoginState extends State<Login> {
                           const SizedBox(height: 12),
                           TextField(
                               controller: _passwordController,
-                              obscureText: true,
+                              obscureText: _passwordVisible,
                               decoration: InputDecoration(
                                   border: const OutlineInputBorder(),
                                   labelText: 'Contraseña',
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      _passwordVisible ? Icons.visibility : Icons.visibility_off
+                                    ), onPressed: () { setState(() {
+                                      _passwordVisible = !_passwordVisible;
+                                    });  },
+                                  ),
                                   errorText: _passwordErrorText),
                               onChanged: (text) =>
                                   setState(() => _password = text)),
-                          /*
+                          /* //TODO
                       const SizedBox(height: 12),
                       TextButton(
                         onPressed: _passwordForgotten(),
@@ -127,8 +135,8 @@ class _LoginState extends State<Login> {
       String ip = constants.ip;
       var headers = {
         'Authorization': 'Basic Y2xpZW50OnNlY3JldA==',
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Cookie': 'SESSION=YmUyM2VjZWUtYTJlNy00MzRkLTk0MjgtNjcyOWM1MmI4NmZl'
+        'Content-Type': 'application/x-www-form-urlencoded'
+        //'Cookie': 'SESSION=YmUyM2VjZWUtYTJlNy00MzRkLTk0MjgtNjcyOWM1MmI4NmZl'
       };
       var request = http.Request('POST', Uri.parse('$ip/oauth/token'));
       request.bodyFields = {
@@ -192,13 +200,13 @@ class _LoginState extends State<Login> {
     });
     if (await _secureStorage.containsKey(key: "access_token")) {
       final accessToken = await _secureStorage.read(key: "access_token");
-      if (accessToken != null) {
+      if (accessToken != null || accessToken!.isNotEmpty) {
         _loginAccess(accessToken);
       }
     } else {
       if (await _secureStorage.containsKey(key: "refresh_token")) {
         final refreshToken = await _secureStorage.read(key: "refresh_token");
-        if (refreshToken != null) {
+        if (refreshToken != null || refreshToken!.isNotEmpty) {
           _loginRefresh(refreshToken);
         }
       }
@@ -210,8 +218,8 @@ class _LoginState extends State<Login> {
 
   void _loginAccess(String accessToken) async {
     var headers = {
-      'Authorization': 'Bearer $accessToken',
-      'Cookie': 'SESSION=YzA4ODYyYTQtNmJlNi00NjRkLTk0MjEtNWZkMGRjYWNmNzRi'
+      'Authorization': 'Bearer $accessToken'
+      //'Cookie': 'SESSION=YzA4ODYyYTQtNmJlNi00NjRkLTk0MjEtNWZkMGRjYWNmNzRi'
     };
     var request = http.Request(
         'GET', Uri.parse('http://${constants.ip}/rest/entities/User'));
@@ -239,8 +247,8 @@ class _LoginState extends State<Login> {
   void _loginRefresh(String refreshToken) async {
     var headers = {
       'Authorization': 'Basic Y2xpZW50OnNlY3JldA==',
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Cookie': 'SESSION=MTY3OTNiODgtODdiNi00NGIyLWIyMWItZWZmNmE0MGM0Yjg4'
+      'Content-Type': 'application/x-www-form-urlencoded'
+      //'Cookie': 'SESSION=MTY3OTNiODgtODdiNi00NGIyLWIyMWItZWZmNmE0MGM0Yjg4'
     };
     var request =
         http.Request('POST', Uri.parse('http://${constants.ip}/oauth/token'));
@@ -279,7 +287,6 @@ class _LoginState extends State<Login> {
 
 /// Clase para la Screen de registro
 class Register extends StatefulWidget {
-  //TODO FINISH
   const Register({Key? key}) : super(key: key);
 
   @override
@@ -297,7 +304,8 @@ class _RegisterState extends State<Register> {
   String? _password;
   String? _passwordCheck;
 
-  late http.Response _response;
+  bool _passwordVisible = true;
+  bool _checkPasswordVisible = true;
 
   @override
   void initState() {
@@ -305,7 +313,6 @@ class _RegisterState extends State<Register> {
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
     _checkPasswordController = TextEditingController();
-    _response = http.Response('', 500);
     super.initState();
   }
 
@@ -348,20 +355,34 @@ class _RegisterState extends State<Register> {
                       const SizedBox(height: 36),
                       TextField(
                         controller: _passwordController,
-                        obscureText: true,
+                        obscureText: _passwordVisible,
                         decoration: InputDecoration(
                             border: const OutlineInputBorder(),
                             labelText: 'Contraseña',
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                  _passwordVisible ? Icons.visibility : Icons.visibility_off
+                              ), onPressed: () { setState(() {
+                              _passwordVisible = !_passwordVisible;
+                            });  },
+                            ),
                             errorText: _passwordErrorText),
                         onChanged: (text) => setState(() => _password = text),
                       ),
                       const SizedBox(height: 12),
                       TextField(
                         controller: _checkPasswordController,
-                        obscureText: true,
+                        obscureText: _checkPasswordVisible,
                         decoration: InputDecoration(
                             border: const OutlineInputBorder(),
                             labelText: 'Repite la contraseña',
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                  _checkPasswordVisible ? Icons.visibility : Icons.visibility_off
+                              ), onPressed: () { setState(() {
+                              _checkPasswordVisible = !_checkPasswordVisible;
+                            });  },
+                            ),
                             errorText: _checkPasswordErrorText),
                         onChanged: (text) =>
                             setState(() => _passwordCheck = text),
@@ -370,50 +391,25 @@ class _RegisterState extends State<Register> {
                       SizedBox(
                           width: 250,
                           child: ElevatedButton(
-                            onPressed: () async {
-                              if (_userErrorText == null &&
-                                  _emailErrorText == null &&
-                                  _passwordErrorText == null &&
-                                  _checkPasswordErrorText == null) {
-                                await _registerAction(
-                                    _username!, _email!, _password!);
-                                print(_response.statusCode);
-                                if (_response.statusCode == 201) {
+                              onPressed: () {
+                                if (_userErrorText == null &&
+                                    _emailErrorText == null &&
+                                    _passwordErrorText == null &&
+                                    _checkPasswordErrorText == null) {
+                                  _registerAction(
+                                      _username!, _email!, _password!);
+                                } else {
                                   Fluttertoast.showToast(
                                       msg:
-                                          'Verifique su registro clickeando el enlace enviado a su correo.',
-                                      toastLength: Toast.LENGTH_LONG,
-                                      gravity: ToastGravity.CENTER,
+                                          'Comprueba que los campos estén rellenos y válidos.',
+                                      toastLength: Toast.LENGTH_SHORT,
+                                      gravity: ToastGravity.BOTTOM,
                                       backgroundColor: Colors.white12,
                                       textColor: Colors.white,
-                                      fontSize: 22.0);
-                                  Future.delayed(
-                                      const Duration(milliseconds: 2500), () {
-                                    Navigator.pop(context);
-                                  });
-                                } else if (_response.statusCode == 500) {
-                                  Fluttertoast.showToast(
-                                      msg:
-                                          'Error al registrar, inténtelo más tarde.',
-                                      toastLength: Toast.LENGTH_SHORT,
-                                      gravity: ToastGravity.CENTER,
-                                      backgroundColor: Colors.white38,
-                                      textColor: Colors.redAccent,
                                       fontSize: 16.0);
                                 }
-                              } else {
-                                Fluttertoast.showToast(
-                                    msg:
-                                        'Comprueba que los campos estén rellenos y válidos.',
-                                    toastLength: Toast.LENGTH_SHORT,
-                                    gravity: ToastGravity.BOTTOM,
-                                    backgroundColor: Colors.white12,
-                                    textColor: Colors.white,
-                                    fontSize: 16.0);
-                              }
-                            },
-                            child: const Text('Registrar'),
-                          ))
+                              },
+                              child: const Text('Registrar')))
                     ])))));
   }
 
@@ -458,30 +454,43 @@ class _RegisterState extends State<Register> {
     return 'Las contraseñas no coinciden.';
   }
 
-  Future<http.Response> _registerAction(
-      String username, String email, String password) async {
-    //Para emulador:
-    //String ip = '10.0.2.2:8080';
-    //Para móvil:
-    String ip = constants.ip;
-    print('Entrada _register');
-    http.Response response = await http.post(
-      Uri.parse('$ip/registration/user'),
-      headers: <String, String>{
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode(<String, String>{
-        'username': username,
-        'email': email,
-        'password': password
-      }),
-    );
-    print('Salida await _register');
-    setState(() {
-      _response = response;
-    });
-    print('Return _register');
-    return response;
+  void _registerAction(String username, String email, String password) async {
+    var headers = {'Content-Type': 'application/json'};
+    var request =
+        http.Request('POST', Uri.parse('${constants.ip}/registration/user'));
+    request.body = json
+        .encode({"username": username, "email": email, "password": password});
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 201) {
+      Fluttertoast.showToast(
+          msg:
+              'Verifique su registro clickeando el enlace enviado a su correo.',
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.CENTER,
+          backgroundColor: Colors.black45,
+          textColor: Colors.lightGreen,
+          fontSize: 22.0);
+      Future.delayed(const Duration(milliseconds: 2500), () {
+        Navigator.pop(
+            context,
+            MaterialPageRoute<void>(
+              builder: (context) => const HomePage(),
+            ));
+      });
+    } else if (response.statusCode == 500 || response.statusCode == 401) {
+      Fluttertoast.showToast(
+          msg: 'Error al registrar, inténtelo más tarde.',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          backgroundColor: Colors.white38,
+          textColor: Colors.redAccent,
+          fontSize: 16.0);
+    } else {
+      print(response.reasonPhrase);
+    }
   }
 
   @override
