@@ -1,11 +1,11 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_appauth/flutter_appauth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:http/http.dart';
-import 'package:lappenultima_app/screens/main.dart';
+import 'package:http/http.dart' as http;
+import 'package:lappenultima_app/screens/home.dart';
+import 'package:lappenultima_app/util/constants.dart' as constants;
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -21,131 +21,147 @@ class _LoginState extends State<Login> {
   String? _password;
 
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
-  final FlutterAppAuth _appAuth = const FlutterAppAuth();
 
-  late Future<bool> _futureLoggedIn;
-  bool _loggedIn = false;
+  String? accessToken;
+  String? refreshToken;
+
+  bool _isBusy = false;
 
   @override
   void initState() {
     _usernameController = TextEditingController();
     _passwordController = TextEditingController();
-    _futureLoggedIn = _checkToken();
+    _checkToken();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    _loggedIn = _futureLoggedIn as bool;
-    if (_loggedIn) {
-      Navigator.pushReplacement(
-          context,
-          MaterialPageRoute<void>(
-            builder: (context) => const MainPage(),
-          ));
-    }
     return Scaffold(
         appBar: AppBar(title: const Text('lappenultima')),
         body: Center(
-            child: Padding(
-                padding: const EdgeInsets.all(40),
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text('lappenultima',
-                          style: Theme.of(context).textTheme.headline1,
-                          textAlign: TextAlign.center),
-                      const SizedBox(height: 12),
-                      Text('Logueate',
-                          style: Theme.of(context).textTheme.headline2,
-                          textAlign: TextAlign.center),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: _usernameController,
-                        obscureText: false,
-                        decoration: InputDecoration(
-                            border: const OutlineInputBorder(),
-                            labelText: 'Nombre de usuario',
-                            errorText: _userErrorText),
-                        onChanged: (text) => setState(() => _username = text),
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                          controller: _passwordController,
-                          obscureText: true,
-                          decoration: InputDecoration(
-                              border: const OutlineInputBorder(),
-                              labelText: 'Contraseña',
-                              errorText: _passwordErrorText),
-                          onChanged: (text) =>
-                              setState(() => _password = text)),
-                      /*
+            child: _isBusy
+                ? const CircularProgressIndicator()
+                : Padding(
+                    padding: const EdgeInsets.all(40),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text('lappenultima',
+                              style: Theme.of(context).textTheme.headline1,
+                              textAlign: TextAlign.center),
+                          const SizedBox(height: 12),
+                          Text('Logueate',
+                              style: Theme.of(context).textTheme.headline2,
+                              textAlign: TextAlign.center),
+                          const SizedBox(height: 12),
+                          TextField(
+                            controller: _usernameController,
+                            obscureText: false,
+                            decoration: InputDecoration(
+                                border: const OutlineInputBorder(),
+                                labelText: 'Nombre de usuario',
+                                errorText: _userErrorText),
+                            onChanged: (text) =>
+                                setState(() => _username = text),
+                          ),
+                          const SizedBox(height: 12),
+                          TextField(
+                              controller: _passwordController,
+                              obscureText: true,
+                              decoration: InputDecoration(
+                                  border: const OutlineInputBorder(),
+                                  labelText: 'Contraseña',
+                                  errorText: _passwordErrorText),
+                              onChanged: (text) =>
+                                  setState(() => _password = text)),
+                          /*
                       const SizedBox(height: 12),
                       TextButton(
                         onPressed: _passwordForgotten(),
                         child: const Text('¿Se te olvidó la contraseña?'),
                       ),
                        */
-                      SizedBox(
-                          width: 250,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              if (_userErrorText == null &&
-                                  _passwordErrorText == null) {
-                                _loginAction(_username!, _password!);
-                              }
-                            },
-                            child: const Text('Login'),
-                          )),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text('¿No tienes cuenta?',
-                              textAlign: TextAlign.center),
-                          TextButton(
-                              onPressed: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute<void>(
-                                      builder: (context) => const Register())),
-                              child: Text(
-                                'Regístrate',
-                                style: Theme.of(context).textTheme.headline3,
-                                textAlign: TextAlign.center,
-                              ))
+                          SizedBox(
+                              width: 250,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  if (_userErrorText == null &&
+                                      _passwordErrorText == null) {
+                                    _loginAction(_username!, _password!);
+                                  }
+                                },
+                                child: const Text('Login'),
+                              )),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text('¿No tienes cuenta?',
+                                  textAlign: TextAlign.center),
+                              TextButton(
+                                  onPressed: () => Navigator.push(
+                                      context,
+                                      MaterialPageRoute<void>(
+                                          builder: (context) =>
+                                              const Register())),
+                                  child: Text(
+                                    'Regístrate',
+                                    style:
+                                        Theme.of(context).textTheme.headline3,
+                                    textAlign: TextAlign.center,
+                                  ))
+                            ],
+                          )
                         ],
-                      )
-                    ],
-                  ),
-                ))));
+                      ),
+                    ))));
   }
 
-  _loginAction(String email, String password) async {}
+  _loginAction(String username, String password) async {
+    setState(() {
+      _isBusy = true;
+    });
+    try {
+      String ip = constants.ip;
+      var headers = {
+        'Authorization': 'Basic Y2xpZW50OnNlY3JldA==',
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Cookie': 'SESSION=YmUyM2VjZWUtYTJlNy00MzRkLTk0MjgtNjcyOWM1MmI4NmZl'
+      };
+      var request = http.Request('POST', Uri.parse('$ip/oauth/token'));
+      request.bodyFields = {
+        'grant_type': 'password',
+        'username': username,
+        'password': password
+      };
+      request.headers.addAll(headers);
 
-  /*
-   final response = await http.post(
-    Uri.parse('http://${ip}/oauth/token'),
-    headers: <String, String>{
-      'Content-Type': 'application/json',
-    },
-    body: jsonEncode(<String, String>{
-      'title': title,
-    }),
-  );
+      http.StreamedResponse response = await request.send();
 
-  if (response.statusCode == 201) {
-    // If the server did return a 201 CREATED response,
-    // then parse the JSON.
-    return Album.fromJson(jsonDecode(response.body));
-  } else {
-    // If the server did not return a 201 CREATED response,
-    // then throw an exception.
-    throw Exception('Failed to create album.');
+      if (response.statusCode == 200) {
+        Map<String, dynamic> mappedResponse =
+            jsonDecode(await response.stream.bytesToString());
+        await _secureStorage.write(
+            key: 'access_token', value: mappedResponse['access_token']);
+        await _secureStorage.write(
+            key: 'refresh_token', value: mappedResponse['refresh_token']);
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute<void>(
+              builder: (context) => const HomePage(),
+            ));
+      } else {
+        print(response.reasonPhrase);
+      }
+    } catch (e) {
+      print('Error: ${e.toString()}');
+    }
+    setState(() {
+      _isBusy = false;
+    });
   }
-}
-
-   */
 
   _passwordForgotten() {
     //TODO Reenviar un email con la pass (no está controlado en la API yet)
@@ -170,29 +186,87 @@ class _LoginState extends State<Login> {
     return null;
   }
 
-  Future<bool> _checkToken() async {
+  Future<void> _checkToken() async {
+    setState(() {
+      _isBusy = true;
+    });
     if (await _secureStorage.containsKey(key: "access_token")) {
       final accessToken = await _secureStorage.read(key: "access_token");
       if (accessToken != null) {
-        return _loginAccess(accessToken);
+        _loginAccess(accessToken);
       }
     } else {
       if (await _secureStorage.containsKey(key: "refresh_token")) {
         final refreshToken = await _secureStorage.read(key: "refresh_token");
         if (refreshToken != null) {
-          return _loginRefresh(refreshToken);
+          _loginRefresh(refreshToken);
         }
       }
     }
-    return false;
+    setState(() {
+      _isBusy = false;
+    });
   }
 
-  bool _loginAccess(String accessToken) {
-    return false;
+  void _loginAccess(String accessToken) async {
+    var headers = {
+      'Authorization': 'Bearer $accessToken',
+      'Cookie': 'SESSION=YzA4ODYyYTQtNmJlNi00NjRkLTk0MjEtNWZkMGRjYWNmNzRi'
+    };
+    var request = http.Request(
+        'GET', Uri.parse('http://${constants.ip}/rest/entities/User'));
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      Map<String, dynamic> mappedResponse =
+          jsonDecode(await response.stream.bytesToString());
+      await _secureStorage.write(key: 'user_id', value: mappedResponse['id']);
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute<void>(
+            builder: (context) => const HomePage(),
+          ));
+    } else if (response.statusCode == 401) {
+      await _secureStorage.delete(key: 'access_token');
+    } else {
+      print(response.reasonPhrase);
+    }
   }
 
-  bool _loginRefresh(String? refreshToken) {
-    return false;
+  void _loginRefresh(String refreshToken) async {
+    var headers = {
+      'Authorization': 'Basic Y2xpZW50OnNlY3JldA==',
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Cookie': 'SESSION=MTY3OTNiODgtODdiNi00NGIyLWIyMWItZWZmNmE0MGM0Yjg4'
+    };
+    var request =
+        http.Request('POST', Uri.parse('http://${constants.ip}/oauth/token'));
+    request.bodyFields = {
+      'grant_type': 'refresh_token',
+      'refresh_token': refreshToken
+    };
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      Map<String, dynamic> mappedResponse =
+          jsonDecode(await response.stream.bytesToString());
+      await _secureStorage.write(
+          key: 'access_token', value: mappedResponse['access_token']);
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute<void>(
+            builder: (context) => const HomePage(),
+          ));
+    } else if (response.statusCode == 401) {
+      await _secureStorage.delete(key: 'refresh_token');
+    } else {
+      print(response.reasonPhrase);
+    }
   }
 
   @override
@@ -223,7 +297,7 @@ class _RegisterState extends State<Register> {
   String? _password;
   String? _passwordCheck;
 
-  late Response _response;
+  late http.Response _response;
 
   @override
   void initState() {
@@ -231,7 +305,7 @@ class _RegisterState extends State<Register> {
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
     _checkPasswordController = TextEditingController();
-    _response = Response('', 500);
+    _response = http.Response('', 500);
     super.initState();
   }
 
@@ -384,15 +458,15 @@ class _RegisterState extends State<Register> {
     return 'Las contraseñas no coinciden.';
   }
 
-  Future<Response> _registerAction(
+  Future<http.Response> _registerAction(
       String username, String email, String password) async {
     //Para emulador:
     //String ip = '10.0.2.2:8080';
     //Para móvil:
-    String ip = '192.168.137.1:8080';
+    String ip = constants.ip;
     print('Entrada _register');
-    Response response = await post(
-      Uri.parse('http://${ip}/registration/user'),
+    http.Response response = await http.post(
+      Uri.parse('$ip/registration/user'),
       headers: <String, String>{
         'Content-Type': 'application/json',
       },
