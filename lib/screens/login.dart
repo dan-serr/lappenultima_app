@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
-import 'package:lappenultima_app/screens/home.dart';
+import 'package:lappenultima_app/screens/root.dart';
 import 'package:lappenultima_app/util/constants.dart' as constants;
 
 class Login extends StatefulWidget {
@@ -20,7 +20,7 @@ class _LoginState extends State<Login> {
   String? _username;
   String? _password;
 
-  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
+  late FlutterSecureStorage _secureStorage;
 
   String? accessToken;
   String? refreshToken;
@@ -30,10 +30,18 @@ class _LoginState extends State<Login> {
 
   @override
   void initState() {
+    _secureStorage = const FlutterSecureStorage();
+    //debugStorage();
     _usernameController = TextEditingController();
     _passwordController = TextEditingController();
     _checkToken();
     super.initState();
+  }
+
+  //Para borrar a elección los tokens guardados.
+  void debugStorage() async {
+    await _secureStorage.write(key: "access_token", value: 'empty');
+    await _secureStorage.write(key: "refresh_token", value: 'empty');
   }
 
   @override
@@ -76,11 +84,14 @@ class _LoginState extends State<Login> {
                                   border: const OutlineInputBorder(),
                                   labelText: 'Contraseña',
                                   suffixIcon: IconButton(
-                                    icon: Icon(
-                                      _passwordVisible ? Icons.visibility : Icons.visibility_off
-                                    ), onPressed: () { setState(() {
-                                      _passwordVisible = !_passwordVisible;
-                                    });  },
+                                    icon: Icon(_passwordVisible
+                                        ? Icons.visibility
+                                        : Icons.visibility_off),
+                                    onPressed: () {
+                                      setState(() {
+                                        _passwordVisible = !_passwordVisible;
+                                      });
+                                    },
                                   ),
                                   errorText: _passwordErrorText),
                               onChanged: (text) =>
@@ -158,7 +169,7 @@ class _LoginState extends State<Login> {
         Navigator.pushReplacement(
             context,
             MaterialPageRoute<void>(
-              builder: (context) => const HomePage(),
+              builder: (context) => const RootPage(),
             ));
       } else {
         print(response.reasonPhrase);
@@ -194,35 +205,34 @@ class _LoginState extends State<Login> {
     return null;
   }
 
-  Future<void> _checkToken() async {
+  void _checkToken() async {
     setState(() {
       _isBusy = true;
     });
-    if (await _secureStorage.containsKey(key: "access_token")) {
+    try {
       final accessToken = await _secureStorage.read(key: "access_token");
       if (accessToken != null || accessToken!.isNotEmpty) {
-        _loginAccess(accessToken);
+        await _loginAccess(accessToken);
       }
-    } else {
-      if (await _secureStorage.containsKey(key: "refresh_token")) {
-        final refreshToken = await _secureStorage.read(key: "refresh_token");
-        if (refreshToken != null || refreshToken!.isNotEmpty) {
-          _loginRefresh(refreshToken);
-        }
+      final refreshToken = await _secureStorage.read(key: "refresh_token");
+      if (refreshToken != null || refreshToken!.isNotEmpty) {
+        await _loginRefresh(refreshToken);
       }
+    } catch (exc) {
+      print(exc.toString());
     }
     setState(() {
       _isBusy = false;
     });
   }
 
-  void _loginAccess(String accessToken) async {
+  Future<void> _loginAccess(String accessToken) async {
     var headers = {
       'Authorization': 'Bearer $accessToken'
       //'Cookie': 'SESSION=YzA4ODYyYTQtNmJlNi00NjRkLTk0MjEtNWZkMGRjYWNmNzRi'
     };
-    var request = http.Request(
-        'GET', Uri.parse('http://${constants.ip}/rest/entities/User'));
+    var request =
+        http.Request('GET', Uri.parse('${constants.ip}/rest/entities/User'));
 
     request.headers.addAll(headers);
 
@@ -230,12 +240,12 @@ class _LoginState extends State<Login> {
 
     if (response.statusCode == 200) {
       Map<String, dynamic> mappedResponse =
-          jsonDecode(await response.stream.bytesToString());
+          jsonDecode(await response.stream.bytesToString())[0];
       await _secureStorage.write(key: 'user_id', value: mappedResponse['id']);
       Navigator.pushReplacement(
           context,
           MaterialPageRoute<void>(
-            builder: (context) => const HomePage(),
+            builder: (context) => const RootPage(),
           ));
     } else if (response.statusCode == 401) {
       await _secureStorage.delete(key: 'access_token');
@@ -244,14 +254,14 @@ class _LoginState extends State<Login> {
     }
   }
 
-  void _loginRefresh(String refreshToken) async {
+  Future<void> _loginRefresh(String refreshToken) async {
     var headers = {
       'Authorization': 'Basic Y2xpZW50OnNlY3JldA==',
       'Content-Type': 'application/x-www-form-urlencoded'
       //'Cookie': 'SESSION=MTY3OTNiODgtODdiNi00NGIyLWIyMWItZWZmNmE0MGM0Yjg4'
     };
     var request =
-        http.Request('POST', Uri.parse('http://${constants.ip}/oauth/token'));
+        http.Request('POST', Uri.parse('${constants.ip}/oauth/token'));
     request.bodyFields = {
       'grant_type': 'refresh_token',
       'refresh_token': refreshToken
@@ -268,7 +278,7 @@ class _LoginState extends State<Login> {
       Navigator.pushReplacement(
           context,
           MaterialPageRoute<void>(
-            builder: (context) => const HomePage(),
+            builder: (context) => const RootPage(),
           ));
     } else if (response.statusCode == 401) {
       await _secureStorage.delete(key: 'refresh_token');
@@ -360,11 +370,14 @@ class _RegisterState extends State<Register> {
                             border: const OutlineInputBorder(),
                             labelText: 'Contraseña',
                             suffixIcon: IconButton(
-                              icon: Icon(
-                                  _passwordVisible ? Icons.visibility : Icons.visibility_off
-                              ), onPressed: () { setState(() {
-                              _passwordVisible = !_passwordVisible;
-                            });  },
+                              icon: Icon(_passwordVisible
+                                  ? Icons.visibility
+                                  : Icons.visibility_off),
+                              onPressed: () {
+                                setState(() {
+                                  _passwordVisible = !_passwordVisible;
+                                });
+                              },
                             ),
                             errorText: _passwordErrorText),
                         onChanged: (text) => setState(() => _password = text),
@@ -377,11 +390,15 @@ class _RegisterState extends State<Register> {
                             border: const OutlineInputBorder(),
                             labelText: 'Repite la contraseña',
                             suffixIcon: IconButton(
-                              icon: Icon(
-                                  _checkPasswordVisible ? Icons.visibility : Icons.visibility_off
-                              ), onPressed: () { setState(() {
-                              _checkPasswordVisible = !_checkPasswordVisible;
-                            });  },
+                              icon: Icon(_checkPasswordVisible
+                                  ? Icons.visibility
+                                  : Icons.visibility_off),
+                              onPressed: () {
+                                setState(() {
+                                  _checkPasswordVisible =
+                                      !_checkPasswordVisible;
+                                });
+                              },
                             ),
                             errorText: _checkPasswordErrorText),
                         onChanged: (text) =>
@@ -477,7 +494,7 @@ class _RegisterState extends State<Register> {
         Navigator.pop(
             context,
             MaterialPageRoute<void>(
-              builder: (context) => const HomePage(),
+              builder: (context) => const Login(),
             ));
       });
     } else if (response.statusCode == 500 || response.statusCode == 401) {
