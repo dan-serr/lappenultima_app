@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'barspage.dart';
 import 'beerspage.dart';
@@ -21,7 +22,6 @@ class _RootPageState extends State<RootPage> {
 
   static int _selectedIndex = 0;
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,11 +31,20 @@ class _RootPageState extends State<RootPage> {
         selectedItemColor: Theme.of(context).colorScheme.primary,
         unselectedItemColor: Colors.grey,
         currentIndex: _selectedIndex,
-        items: const <BottomNavigationBarItem> [
-          BottomNavigationBarItem(icon: Icon(Icons.home_outlined),activeIcon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.wine_bar_outlined),activeIcon: Icon(Icons.wine_bar), label: 'Beers'),
-          BottomNavigationBarItem(icon: Icon(Icons.map_outlined),activeIcon: Icon(Icons.map), label: 'Bars')
-      ],
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+              icon: Icon(Icons.home_outlined),
+              activeIcon: Icon(Icons.home),
+              label: 'Home'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.wine_bar_outlined),
+              activeIcon: Icon(Icons.wine_bar),
+              label: 'Beers'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.map_outlined),
+              activeIcon: Icon(Icons.map),
+              label: 'Bars')
+        ],
       ),
     );
   }

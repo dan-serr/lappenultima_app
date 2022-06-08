@@ -166,11 +166,11 @@ class _LoginState extends State<Login> {
             key: 'access_token', value: mappedResponse['access_token']);
         await _secureStorage.write(
             key: 'refresh_token', value: mappedResponse['refresh_token']);
-        Navigator.pushReplacement(
+        Future.sync(() => Navigator.pushReplacement(
             context,
             MaterialPageRoute<void>(
               builder: (context) => const RootPage(),
-            ));
+            )));
       } else {
         print(response.reasonPhrase);
       }
@@ -221,9 +221,11 @@ class _LoginState extends State<Login> {
     } catch (exc) {
       print(exc.toString());
     }
-    setState(() {
-      _isBusy = false;
-    });
+    if (mounted) {
+      setState(() {
+        _isBusy = false;
+      });
+    }
   }
 
   Future<void> _loginAccess(String accessToken) async {
@@ -241,12 +243,13 @@ class _LoginState extends State<Login> {
     if (response.statusCode == 200) {
       Map<String, dynamic> mappedResponse =
           jsonDecode(await response.stream.bytesToString())[0];
-      await _secureStorage.write(key: 'user_id', value: mappedResponse['id']);
-      Navigator.pushReplacement(
+      await _secureStorage.write(key: 'user_id', value:  mappedResponse['id']);
+      print(mappedResponse['id']);
+      Future.sync(() => Navigator.pushReplacement(
           context,
           MaterialPageRoute<void>(
             builder: (context) => const RootPage(),
-          ));
+          )));
     } else if (response.statusCode == 401) {
       await _secureStorage.delete(key: 'access_token');
     } else {
@@ -275,11 +278,13 @@ class _LoginState extends State<Login> {
           jsonDecode(await response.stream.bytesToString());
       await _secureStorage.write(
           key: 'access_token', value: mappedResponse['access_token']);
-      Navigator.pushReplacement(
+      await _secureStorage.write(
+          key: 'refresh_token', value: mappedResponse['refresh_token']);
+      Future.sync(() => Navigator.pushReplacement(
           context,
           MaterialPageRoute<void>(
             builder: (context) => const RootPage(),
-          ));
+          )));
     } else if (response.statusCode == 401) {
       await _secureStorage.delete(key: 'refresh_token');
     } else {
@@ -443,12 +448,12 @@ class _RegisterState extends State<Register> {
 
   String? get _emailErrorText {
     final text = _emailController.text;
-    final _emailRegex = RegExp(
+    final emailRegex = RegExp(
         r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
     if (text.isEmpty) {
       return 'No puede estar vacío.';
     }
-    if (!_emailRegex.hasMatch(text)) {
+    if (!emailRegex.hasMatch(text)) {
       return 'No has introducido un email válido.';
     }
     return null;

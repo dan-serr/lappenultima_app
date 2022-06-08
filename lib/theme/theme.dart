@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-//TODO MAKE THEME DATA LIKE SAHDOWS AND SHIT
+//TODO REVAMP THEME DATA
 class AppenultimaTheme {
   static TextTheme lightTextTheme = TextTheme(
     bodyText1: GoogleFonts.openSans(

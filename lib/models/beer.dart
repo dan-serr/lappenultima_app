@@ -1,10 +1,14 @@
+import 'beercompany.dart';
+import 'beertype.dart';
+
 class Beer {
   final int id;
-  int? iDBeerCompany;
-  int? iDBeerType;
+  BeerCompany? iDBeerCompany;
+  BeerType? iDBeerType;
   int? iBUs;
   final String name;
   String? description;
+  String? image;
 
   Beer(
       {required this.id,
@@ -12,22 +16,25 @@ class Beer {
       this.iDBeerType,
       this.iBUs,
       required this.name,
-      this.description});
+      this.description,
+      this.image});
 
   Beer.fromJson(Map<String, dynamic> json)
       : id = json['id'],
-        iDBeerCompany = json['iDBeerCompany'],
-        iDBeerType = json['iDBeerType'],
+        iDBeerCompany = json['iDBeerCompany'] != null ? BeerCompany.fromJson(json['iDBeerCompany']) : null,
+        iDBeerType = json['iDBeerType'] != null ? BeerType.fromJson(json['iDBeerType']) : null,
         iBUs = json['iBUs'],
         name = json['name'],
-        description = json['description'];
+        description = json['description'],
+        image = json['image'];
 
   Map<String, dynamic> toJson() => {
         'id': id,
-        'iDBeerCompany': iDBeerCompany,
-        'iDBeerType': iDBeerType,
+        'iDBeerCompany': iDBeerCompany?.toJson(),
+        'iDBeerType': iDBeerType?.toJson() ,
         'iBUs': iBUs,
         'name': name,
-        'description': description
+        'description': description,
+        'image': image
       };
 }
