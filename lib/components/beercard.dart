@@ -1,7 +1,6 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:lappenultima_app/models/beer.dart';
 import 'package:lappenultima_app/util/remoteapi.dart';
 import '../util/constants.dart' as constants;
@@ -22,7 +21,7 @@ class BeerCard extends StatefulWidget {
 class _BeerCardState extends State<BeerCard> {
   late Future<bool> _futureFav;
 
-  late bool fav;
+  late bool _fav;
   bool firstLoad = true;
 
   @override
@@ -37,9 +36,8 @@ class _BeerCardState extends State<BeerCard> {
       borderRadius: const BorderRadius.all(Radius.circular(10.0)),
       clipBehavior: Clip.antiAlias,
       child: GestureDetector(
-        onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute<void>(
+        onTap: () => Navigator.of(context)
+            .push(MaterialPageRoute<void>(
                 builder: (context) => BeerDetail(
                     beer: widget.beer, accessToken: widget.accessToken))),
         child: SafeArea(
@@ -116,12 +114,12 @@ class _BeerCardState extends State<BeerCard> {
                                   ConnectionState.done) {
                                 if (snapshot.hasData) {
                                   if (firstLoad) {
-                                    fav = snapshot.data as bool? ?? false;
+                                    _fav = snapshot.data as bool? ?? false;
                                     firstLoad = false;
                                   }
                                   return IconButton(
                                     icon: Icon(
-                                      fav == true
+                                      _fav == true
                                           ? Icons.favorite
                                           : Icons.favorite_border_outlined,
                                       size: 40,
@@ -141,11 +139,11 @@ class _BeerCardState extends State<BeerCard> {
   }
 
   void _handleFav() {
-    fav != true
+    _fav != true
         ? RemoteApi.postBeerFav(widget.beer.id)
         : RemoteApi.deleteBeerFav(widget.beer.id);
     setState(() {
-      fav = !fav;
+      _fav = !_fav;
     });
   }
 }

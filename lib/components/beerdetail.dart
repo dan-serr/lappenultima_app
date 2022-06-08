@@ -5,6 +5,7 @@ import 'package:lappenultima_app/models/beer.dart';
 
 import 'package:lappenultima_app/util/constants.dart' as constants;
 import 'package:lappenultima_app/util/remoteapi.dart';
+import 'package:rating_dialog/rating_dialog.dart';
 
 class BeerDetail extends StatefulWidget {
   const BeerDetail({Key? key, required this.accessToken, required this.beer})
@@ -18,16 +19,21 @@ class BeerDetail extends StatefulWidget {
 }
 
 class _BeerDetailState extends State<BeerDetail> {
-  late Future<bool> _fav;
-  late Future<bool> _rated;
+  late Future<bool> _futureFav;
+  late Future<bool> _futureRated;
 
+  late bool _fav;
+  late bool _rated;
+
+  bool _firstLoadFav = true;
+  bool _firstLoadRated = true;
   double? _rating;
 
   @override
   void initState() {
     super.initState();
-    _fav = RemoteApi.getBeerFav(widget.beer.id);
-    _rated = RemoteApi.getBeerRating(widget.beer.id);
+    _futureFav = RemoteApi.getBeerFav(widget.beer.id);
+    _futureRated = RemoteApi.getBeerRating(widget.beer.id);
   }
 
   @override
@@ -74,15 +80,17 @@ class _BeerDetailState extends State<BeerDetail> {
                             )),
                         const SizedBox(height: 10),
                         Visibility(
-                            visible: widget.beer.description != '' ? true : false,
+                            visible:
+                                widget.beer.description != '' ? true : false,
                             child: AutoSizeText(
                               'IBUs: ${widget.beer.iBUs}',
                               wrapWords: true,
                             )),
                         const SizedBox(height: 10),
                         Visibility(
-                            visible:
-                                widget.beer.iDBeerCompany != null ? true : false,
+                            visible: widget.beer.iDBeerCompany != null
+                                ? true
+                                : false,
                             child: AutoSizeText(
                               'Compañía: ${widget.beer.iDBeerCompany?.name}, ${widget.beer.iDBeerCompany?.country}',
                               wrapWords: true,
@@ -109,26 +117,38 @@ class _BeerDetailState extends State<BeerDetail> {
                 child: SizedBox(
                   width: 250,
                   child: FutureBuilder(
-                    future: _fav,
+                    future: _futureFav,
                     builder: (context, snapshot) {
-                      bool? faved = snapshot.data as bool?;
-                      return ElevatedButton(
-                          onPressed: _handleFav,
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              faved == true
-                                  ? const Icon(Icons.favorite)
-                                  : const Icon(Icons.favorite_border_outlined),
-                              const SizedBox(width: 25),
-                              faved == true
-                                  ? const Text('Eliminar como favorito',
-                                  textAlign: TextAlign.center)
-                                  : const Text('Marcar como favorito',
-                                  textAlign: TextAlign.center),
-                            ],
-                          ));
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const CircularProgressIndicator();
+                      } else if (snapshot.connectionState ==
+                          ConnectionState.done) {
+                        if (snapshot.hasData) {
+                          if (_firstLoadFav) {
+                            _fav = snapshot.data as bool? ?? false;
+                            _firstLoadFav = false;
+                          }
+                          return ElevatedButton(
+                              onPressed: _handleFav,
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  _fav == true
+                                      ? const Icon(Icons.favorite)
+                                      : const Icon(
+                                          Icons.favorite_border_outlined),
+                                  const SizedBox(width: 25),
+                                  _fav == true
+                                      ? const Text('Eliminar como favorito',
+                                          textAlign: TextAlign.center)
+                                      : const Text('Marcar como favorito',
+                                          textAlign: TextAlign.center),
+                                ],
+                              ));
+                        }
+                      }
+                      return const Icon(Icons.error, size: 40);
                     },
                   ),
                 ),
@@ -142,33 +162,43 @@ class _BeerDetailState extends State<BeerDetail> {
                 child: SizedBox(
                   width: 250,
                   child: FutureBuilder(
-                    future: _rated,
+                    future: _futureRated,
                     builder: (context, snapshot) {
-                      bool? rated = snapshot.data as bool?;
-                    return ElevatedButton(
-                        onPressed: _handleRating,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            rated == true
-                                ? const Icon(Icons.star)
-                                : const Icon(Icons.star_border_outlined),
-                            const SizedBox(width: 25),
-                            rated == true
-                                ? Text(
-                                'Eliminar tu votación: ${_rating.toString()}',
-                                textAlign: TextAlign.center)
-                                : const Text('Dejar tu opinión',
-                                textAlign: TextAlign.center),
-                          ],
-                        ));
-                  },
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const CircularProgressIndicator();
+                      } else if (snapshot.connectionState ==
+                          ConnectionState.done) {
+                        if (snapshot.hasData) {
+                          if (_firstLoadRated) {
+                            _rated = snapshot.data as bool? ?? false;
+                            _firstLoadRated = false;
+                          }
+                          return ElevatedButton(
+                              onPressed: _handleRating,
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  _rated == true
+                                      ? const Icon(Icons.star)
+                                      : const Icon(Icons.star_border_outlined),
+                                  const SizedBox(width: 25),
+                                  _rated == true
+                                      ? const Text('Eliminar tu votación.',
+                                          textAlign: TextAlign.center)
+                                      : const Text('Dejar tu opinión',
+                                          textAlign: TextAlign.center),
+                                ],
+                              ));
+                        }
+                      }
+                      return const Icon(Icons.error, size: 40);
+                    },
                   ),
                 ),
               ),
-            //TODO: Añadir ver lista de bares donde está dicha cerveza o ->> meter en un scroll row <<-
-                ])),
+              //TODO: Añadir ver lista de bares donde está dicha cerveza o ->> meter en un scroll row <<-
+            ])),
           ),
         ),
       ),
@@ -176,15 +206,25 @@ class _BeerDetailState extends State<BeerDetail> {
   }
 
   void _handleFav() {
-
+    _fav != true
+        ? RemoteApi.postBeerFav(widget.beer.id)
+        : RemoteApi.deleteBeerFav(widget.beer.id);
+    setState(() {
+      _fav = !_fav;
+    });
   }
 
   void _handleRating() {
-
+    _rated != true
+        ? _showRatingDialog(widget.beer.id)
+        : RemoteApi.deleteBeerFav(widget.beer.id);
+    setState(() {
+      _rated = !_rated;
+    });
   }
 
-/*void _showRatingDialog() {
-    final _ratingDialog = RatingDialog(
+  void _showRatingDialog(int beer) {
+    final ratingDialog = RatingDialog(
         title: Text(
           'Rate ${widget.beer.name}',
           textAlign: TextAlign.center,
@@ -192,14 +232,12 @@ class _BeerDetailState extends State<BeerDetail> {
         submitButtonText: 'Rate',
         commentHint: 'Give us your opinion!',
         onSubmitted: (p0) =>
-        (print(
-            'Rated ${widget.beer.name} with ${p0.rating} and ${p0.comment}')));
-    //TODO enviar la respuesta a servidor (json?)
+            RemoteApi.postBeerRating(beer, p0.rating as int, p0.comment));
 
     showDialog(
       context: context,
       barrierDismissible: true,
-      builder: (context) => _ratingDialog,
+      builder: (context) => ratingDialog,
     );
-  }*/
+  }
 }
