@@ -21,19 +21,22 @@ class BeerDetail extends StatefulWidget {
 class _BeerDetailState extends State<BeerDetail> {
   late Future<bool> _futureFav;
   late Future<bool> _futureRated;
+  late Future<int> _futureRating;
 
   late bool _fav;
   late bool _rated;
+  late int _rating;
 
   bool _firstLoadFav = true;
   bool _firstLoadRated = true;
-  double? _rating;
+  bool _firstLoadRating = true;
 
   @override
   void initState() {
     super.initState();
-    _futureFav = RemoteApi.getBeerFav(widget.beer.id);
-    _futureRated = RemoteApi.getBeerRating(widget.beer.id);
+    _futureFav = RemoteApi.isBeerFav(widget.beer.id);
+    _futureRated = RemoteApi.isBeerRated(widget.beer.id);
+    _futureRating = RemoteApi.getBeerRating(widget.beer.id);
   }
 
   @override
@@ -57,56 +60,91 @@ class _BeerDetailState extends State<BeerDetail> {
                     style: Theme.of(context).textTheme.headline2),
               ),
               const Divider(height: 30),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  widget.beer.image != null
-                      ? CachedNetworkImage(
-                          imageUrl:
-                              '${constants.ip}/rest/files?fileRef=${widget.beer.image}&access_token=${widget.accessToken}',
-                          width: 125)
-                      : const Placeholder(),
-                  Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Visibility(
-                            visible:
-                                widget.beer.iDBeerType != null ? true : false,
+              Expanded(
+                flex: 0,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    widget.beer.image != null
+                        ? CachedNetworkImage(
+                            imageUrl:
+                                '${constants.ip}/rest/files?fileRef=${widget.beer.image}&access_token=${widget.accessToken}',
+                            width: 125)
+                        : CachedNetworkImage(
+                            imageUrl: 'http://via.placeholder.com/125x250',
+                            fit: BoxFit.scaleDown),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Visibility(
+                              visible: widget.beer.iDBeerType != null,
+                              child: AutoSizeText(
+                                'Tipo: ${widget.beer.iDBeerType?.name}',
+                                wrapWords: true,
+                              )),
+                          const SizedBox(height: 10),
+                          Visibility(
+                              visible: widget.beer.description != '',
+                              child: AutoSizeText(
+                                'IBUs: ${widget.beer.iBUs}',
+                                wrapWords: true,
+                              )),
+                          const SizedBox(height: 10),
+                          Visibility(
+                              visible: widget.beer.iDBeerCompany != null,
+                              child: AutoSizeText(
+                                'Compañía: ${widget.beer.iDBeerCompany?.name}, ${widget.beer.iDBeerCompany?.country}',
+                                wrapWords: true,
+                              )),
+                          const SizedBox(height: 10),
+                          Visibility(
+                            visible: widget.beer.description != '',
                             child: AutoSizeText(
-                              'Tipo: ${widget.beer.iDBeerType?.name}',
+                              'Descripción: ${widget.beer.description}',
                               wrapWords: true,
-                            )),
-                        const SizedBox(height: 10),
-                        Visibility(
-                            visible:
-                                widget.beer.description != '' ? true : false,
-                            child: AutoSizeText(
-                              'IBUs: ${widget.beer.iBUs}',
-                              wrapWords: true,
-                            )),
-                        const SizedBox(height: 10),
-                        Visibility(
-                            visible: widget.beer.iDBeerCompany != null
-                                ? true
-                                : false,
-                            child: AutoSizeText(
-                              'Compañía: ${widget.beer.iDBeerCompany?.name}, ${widget.beer.iDBeerCompany?.country}',
-                              wrapWords: true,
-                            )),
-                        const SizedBox(height: 10),
-                        Visibility(
-                          visible: widget.beer.description != '' ? true : false,
-                          child: AutoSizeText(
-                            'Descripción: ${widget.beer.description}',
-                            wrapWords: true,
+                            ),
                           ),
-                        )
-                      ],
+                          const SizedBox(height: 10),
+                          FutureBuilder(
+                              future: _futureRating,
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return const CircularProgressIndicator();
+                                } else if (snapshot.connectionState ==
+                                    ConnectionState.done) {
+                                  if (snapshot.hasData) {
+                                    if (_firstLoadRating) {
+                                      _rating = snapshot.data as int;
+                                      _firstLoadRating = false;
+                                    }
+                                    return Row(
+                                      children: (puntuacion) {
+                                        List<Widget> widgets = <Widget>[];
+                                        widgets.add(const Text('Valoración: '));
+                                        for (int i = 0; i < 5; i++) {
+                                          if (i < _rating) {
+                                            widgets.add(const Icon(Icons.star));
+                                          } else {
+                                            widgets.add(
+                                                const Icon(Icons.star_outline));
+                                          }
+                                        }
+                                        return widgets;
+                                      }(_rating),
+                                    );
+                                  }
+                                }
+                                return const Icon(Icons.error, size: 20);
+                                //return const SizedBox(height: 1);
+                              }),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               const SizedBox(
                 height: 10,
@@ -217,7 +255,7 @@ class _BeerDetailState extends State<BeerDetail> {
   void _handleRating() {
     _rated != true
         ? _showRatingDialog(widget.beer.id)
-        : RemoteApi.deleteBeerFav(widget.beer.id);
+        : RemoteApi.deleteBeerRating(widget.beer.id);
     setState(() {
       _rated = !_rated;
     });
@@ -229,10 +267,11 @@ class _BeerDetailState extends State<BeerDetail> {
           'Rate ${widget.beer.name}',
           textAlign: TextAlign.center,
         ),
+        initialRating: 1,
         submitButtonText: 'Rate',
         commentHint: 'Give us your opinion!',
-        onSubmitted: (p0) =>
-            RemoteApi.postBeerRating(beer, p0.rating as int, p0.comment));
+        onSubmitted: (response) => RemoteApi.postBeerRating(
+            beer, response.rating.round(), response.comment));
 
     showDialog(
       context: context,

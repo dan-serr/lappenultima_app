@@ -27,7 +27,7 @@ class _BeerCardState extends State<BeerCard> {
   @override
   void initState() {
     super.initState();
-    _futureFav = RemoteApi.getBeerFav(widget.beer.id);
+    _futureFav = RemoteApi.isBeerFav(widget.beer.id);
   }
 
   @override

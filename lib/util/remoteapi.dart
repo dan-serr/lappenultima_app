@@ -41,7 +41,7 @@ class RemoteApi {
   static Future<List<Bar>> fetchBars(int offset, int size, [String? searchTerm]) async { //TODO
     }*/
 
-  static Future<bool> getBeerFav(int beer) async {
+  static Future<bool> isBeerFav(int beer) async {
     String? accessToken = await _secureStorage.read(key: 'access_token');
     String? user = await _secureStorage.read(key: 'user_id');
     var headers = {
@@ -56,7 +56,130 @@ class RemoteApi {
     return await response.stream.bytesToString() == 'true';
   }
 
-  static Future<bool> getBarFav(int bar) async {
+  static Future<bool> isBeerRated(int beer) async {
+    String? accessToken = await _secureStorage.read(key: 'access_token');
+    String? user = await _secureStorage.read(key: 'user_id');
+    var headers = {
+      'Authorization': 'Bearer $accessToken',
+      //'Cookie': 'SESSION=M2U5OGFkYmEtOTgwMy00MWY2LTk4ZjMtNjQ0ZGFlMzFlNWE0'
+    };
+    var request = http.Request(
+        'GET', Uri.parse('${constants.ip}/rating/beer/$user/$beer'));
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+    return await response.stream.bytesToString() == 'true';
+  }
+
+  static Future<int> getBeerRating(int beer) async {
+    String? accessToken = await _secureStorage.read(key: 'access_token');
+    var headers = {'Authorization': 'Bearer $accessToken'};
+    var request =
+        http.Request('GET', Uri.parse('${constants.ip}/rating/beer/$beer'));
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      String res = await response.stream.bytesToString();
+      if (res == '') {
+        return 0;
+      }
+      return int.parse(res);
+    } else {
+      print(response.reasonPhrase);
+    }
+    return 0;
+  }
+
+  static Future<void> postBeerFav(int beer) async {
+    String? accessToken = await _secureStorage.read(key: 'access_token');
+    String? user = await _secureStorage.read(key: 'user_id');
+    var headers = {
+      'Authorization': 'Bearer $accessToken',
+      //'Cookie': 'SESSION=ZTI5MjI1MDctMTk5Yi00YTBlLWIyNmUtMGFhYzA5YWE0MGFm'
+    };
+    var request = http.MultipartRequest(
+        'POST', Uri.parse('${constants.ip}/fav/beer/$user/$beer'));
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      print(await response.stream.bytesToString());
+    } else {
+      print(response.reasonPhrase);
+    }
+  }
+
+  static Future<void> postBeerRating(int beer, int rating,
+      [String? opinion]) async {
+    String? accessToken = await _secureStorage.read(key: 'access_token');
+    String? user = await _secureStorage.read(key: 'user_id');
+    var headers = {
+      'Authorization': 'Bearer $accessToken',
+      'Content-Type': 'application/json',
+      //'Cookie': 'SESSION=YmNlODIzMzEtMzhkOS00OWMyLWE2MzQtZjkwNGJkZTQwNWE5'
+    };
+    var request = http.Request(
+        'POST', Uri.parse('${constants.ip}/rest/entities/BeerRating/'));
+    request.body = json.encode({
+      "id": {"iDUser": "$user", "iDBeer": beer},
+      "iDUser": {"id": "$user"},
+      "iDBeer": {"id": beer},
+      "rating": rating,
+      "opinion": "$opinion"
+    });
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      print(await response.stream.bytesToString());
+    } else {
+      print(response.reasonPhrase);
+    }
+  }
+
+  static Future<void> deleteBeerFav(int beer) async {
+    String? accessToken = await _secureStorage.read(key: 'access_token');
+    String? user = await _secureStorage.read(key: 'user_id');
+    var headers = {
+      'Authorization': 'Bearer $accessToken',
+      //'Cookie': 'SESSION=YmNlODIzMzEtMzhkOS00OWMyLWE2MzQtZjkwNGJkZTQwNWE5'
+    };
+    var request = http.Request(
+        'DELETE', Uri.parse('${constants.ip}/fav/beer/$user/$beer'));
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      print(await response.stream.bytesToString());
+    } else {
+      print(response.reasonPhrase);
+    }
+  }
+
+  static Future<void> deleteBeerRating(int beer) async {
+    String? accessToken = await _secureStorage.read(key: 'access_token');
+    String? user = await _secureStorage.read(key: 'user_id');
+    var headers = {
+      'Authorization': 'Bearer $accessToken',
+      //'Cookie': 'SESSION=M2U5OGFkYmEtOTgwMy00MWY2LTk4ZjMtNjQ0ZGFlMzFlNWE0'
+    };
+    var request = http.Request(
+        'DELETE', Uri.parse('${constants.ip}/rating/beer/$user/$beer'));
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+    print(await response.stream.bytesToString());
+  }
+
+  static Future<bool> isBarFav(int bar) async {
     String? accessToken = await _secureStorage.read(key: 'access_token');
     String? user = await _secureStorage.read(key: 'user_id');
     var headers = {
@@ -73,7 +196,7 @@ class RemoteApi {
     return await response.stream.bytesToString() == 'true';
   }
 
-  static Future<bool> getBeerRating(int beer) async {
+  static Future<bool> isBarRated(int bar) async {
     String? accessToken = await _secureStorage.read(key: 'access_token');
     String? user = await _secureStorage.read(key: 'user_id');
     var headers = {
@@ -81,23 +204,7 @@ class RemoteApi {
       //'Cookie': 'SESSION=M2U5OGFkYmEtOTgwMy00MWY2LTk4ZjMtNjQ0ZGFlMzFlNWE0'
     };
     var request =
-        http.Request('GET', Uri.parse('${constants.ip}/rating/beer/$user'));
-
-    request.headers.addAll(headers);
-
-    http.StreamedResponse response = await request.send();
-    return await response.stream.bytesToString() == 'true';
-  }
-
-  static Future<bool> getBarRating(int bar) async {
-    String? accessToken = await _secureStorage.read(key: 'access_token');
-    String? user = await _secureStorage.read(key: 'user_id');
-    var headers = {
-      'Authorization': 'Bearer $accessToken',
-      //'Cookie': 'SESSION=M2U5OGFkYmEtOTgwMy00MWY2LTk4ZjMtNjQ0ZGFlMzFlNWE0'
-    };
-    var request =
-        http.Request('GET', Uri.parse('${constants.ip}/rating/bar/$user'));
+        http.Request('GET', Uri.parse('${constants.ip}/rating/bar/$user/$bar'));
 
     request.headers.addAll(headers);
 
@@ -106,25 +213,25 @@ class RemoteApi {
     return await response.stream.bytesToString() == 'true';
   }
 
-  static Future<void> postBeerFav(int beer) async {
+  static Future<int> getBarRating(int bar) async {
     String? accessToken = await _secureStorage.read(key: 'access_token');
-    String? user = await _secureStorage.read(key: 'user_id');
-    var headers = {
-      'Authorization': 'Bearer $accessToken',
-      //'Cookie': 'SESSION=ZTI5MjI1MDctMTk5Yi00YTBlLWIyNmUtMGFhYzA5YWE0MGFm'
-    };
-    var request = http.MultipartRequest('POST', Uri.parse('${constants.ip}/fav/beer/$user/$beer'));
-
+    var headers = {'Authorization': 'Bearer $accessToken'};
+    var request =
+        http.Request('GET', Uri.parse('${constants.ip}/rating/bar/$bar'));
     request.headers.addAll(headers);
 
     http.StreamedResponse response = await request.send();
 
     if (response.statusCode == 200) {
-      print(await response.stream.bytesToString());
-    }
-    else {
+      String res = await response.stream.bytesToString();
+      if (res == '') {
+        return 0;
+      }
+      return int.parse(res);
+    } else {
       print(response.reasonPhrase);
     }
+    return 0;
   }
 
   static Future<void> postBarFav(int bar) async {
@@ -134,7 +241,8 @@ class RemoteApi {
       'Authorization': 'Bearer $accessToken',
       //'Cookie': 'SESSION=ZTI5MjI1MDctMTk5Yi00YTBlLWIyNmUtMGFhYzA5YWE0MGFm'
     };
-    var request = http.MultipartRequest('POST', Uri.parse('${constants.ip}/fav/bar/$user/$bar'));
+    var request = http.MultipartRequest(
+        'POST', Uri.parse('${constants.ip}/fav/bar/$user/$bar'));
 
     request.headers.addAll(headers);
 
@@ -142,13 +250,13 @@ class RemoteApi {
 
     if (response.statusCode == 200) {
       print(await response.stream.bytesToString());
-    }
-    else {
+    } else {
       print(response.reasonPhrase);
     }
   }
 
-  static Future<void> postBeerRating(int beer, int rating, [String? opinion]) async {
+  static Future<void> postBarRating(int bar, int rating,
+      [String? opinion]) async {
     String? accessToken = await _secureStorage.read(key: 'access_token');
     String? user = await _secureStorage.read(key: 'user_id');
     var headers = {
@@ -156,18 +264,12 @@ class RemoteApi {
       'Content-Type': 'application/json',
       //'Cookie': 'SESSION=YmNlODIzMzEtMzhkOS00OWMyLWE2MzQtZjkwNGJkZTQwNWE5'
     };
-    var request = http.Request('POST', Uri.parse('${constants.ip}/rest/entities/BeerRating/'));
+    var request = http.Request(
+        'POST', Uri.parse('${constants.ip}/rest/entities/BarRating/'));
     request.body = json.encode({
-      "id": {
-        "iDUser": "$user",
-        "iDBeer": beer
-      },
-      "iDUser": {
-        "id": "$user"
-      },
-      "iDBeer": {
-        "id": beer
-      },
+      "id": {"iDUser": "$user", "iDBar": bar},
+      "iDUser": {"id": "$user"},
+      "iDBar": {"id": bar},
       "rating": rating,
       "opinion": "$opinion"
     });
@@ -177,41 +279,12 @@ class RemoteApi {
 
     if (response.statusCode == 200) {
       print(await response.stream.bytesToString());
-    }
-    else {
+    } else {
       print(response.reasonPhrase);
     }
-
   }
 
-  static Future<void> postBarRating(int bar) async {}
-
-  static Future<void> deleteBeerFav(int beer) async {
-    String? accessToken = await _secureStorage.read(key: 'access_token');
-    String? user = await _secureStorage.read(key: 'user_id');
-    var headers = {
-      'Authorization': 'Bearer $accessToken',
-      //'Cookie': 'SESSION=YmNlODIzMzEtMzhkOS00OWMyLWE2MzQtZjkwNGJkZTQwNWE5'
-    };
-    var request = http.Request('DELETE', Uri.parse('${constants.ip}/fav/beer/$user/$beer'));
-    request.headers.addAll(headers);
-
-    http.StreamedResponse response = await request.send();
-
-    if (response.statusCode == 200) {
-      print(await response.stream.bytesToString());
-    }
-    else {
-      print(response.reasonPhrase);
-    }
-
-  }
-
-  static Future<void> deleteBarFav(int bar) async {
-
-  }
-
-  static Future<void> deleteBeerRating(int beer) async {}
+  static Future<void> deleteBarFav(int bar) async {}
 
   static Future<void> deleteBarRating(int bar) async {}
 }

@@ -103,6 +103,7 @@ class _LoginState extends State<Login> {
                         child: const Text('¿Se te olvidó la contraseña?'),
                       ),
                        */
+                          const SizedBox(height: 15),
                           SizedBox(
                               width: 250,
                               child: ElevatedButton(
@@ -243,7 +244,7 @@ class _LoginState extends State<Login> {
     if (response.statusCode == 200) {
       Map<String, dynamic> mappedResponse =
           jsonDecode(await response.stream.bytesToString())[0];
-      await _secureStorage.write(key: 'user_id', value:  mappedResponse['id']);
+      await _secureStorage.write(key: 'user_id', value: mappedResponse['id']);
       print(mappedResponse['id']);
       Future.sync(() => Navigator.pushReplacement(
           context,
