@@ -1,32 +1,25 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:lappenultima_app/models/beer.dart';
+import 'package:lappenultima_app/models/bar.dart';
 import 'package:lappenultima_app/util/remoteapi.dart';
 import 'package:page_transition/page_transition.dart';
 import '../util/constants.dart' as constants;
 
-import 'beerdetail.dart';
+import 'bardetail.dart';
 
-class BeerCard extends StatefulWidget {
-  const BeerCard(
-      {Key? key,
-      required this.beer,
-      required this.accessToken,
-      this.width = 350,
-      this.height = 250})
+class BarCard extends StatefulWidget {
+  const BarCard({Key? key, required this.bar, required this.accessToken})
       : super(key: key);
 
-  final Beer beer;
+  final Bar bar;
   final String accessToken;
-  final double width;
-  final double height;
 
   @override
-  State<BeerCard> createState() => _BeerCardState();
+  State<BarCard> createState() => _BarCardState();
 }
 
-class _BeerCardState extends State<BeerCard> {
+class _BarCardState extends State<BarCard> {
   late Future<bool> _futureFav;
 
   late bool _fav;
@@ -35,7 +28,7 @@ class _BeerCardState extends State<BeerCard> {
   @override
   void initState() {
     super.initState();
-    _futureFav = RemoteApi.isBeerFav(widget.beer.id);
+    _futureFav = RemoteApi.isBarFav(widget.bar.id);
   }
 
   @override
@@ -46,17 +39,15 @@ class _BeerCardState extends State<BeerCard> {
       child: GestureDetector(
         onTap: () => Navigator.of(context).push(PageTransition(
             type: PageTransitionType.fade,
-            child: BeerDetail(
-              beer: widget.beer,
-              accessToken: widget.accessToken,
-            ))),
+            child:
+                BarDetail(bar: widget.bar, accessToken: widget.accessToken))),
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(10, 12.5, 10, 7.5),
             child: Container(
                 padding: const EdgeInsets.all(16),
-                constraints: BoxConstraints.expand(
-                    width: widget.width, height: widget.height),
+                constraints:
+                    const BoxConstraints.expand(width: 350, height: 250),
                 decoration: const BoxDecoration(
                     gradient: LinearGradient(
                         begin: Alignment.topLeft,
@@ -75,38 +66,34 @@ class _BeerCardState extends State<BeerCard> {
                 child: Stack(
                   children: [
                     Positioned(
+                        bottom: 5,
                         right: 15,
-                        child: widget.beer.image != null
-                            ? CachedNetworkImage(
-                                imageUrl:
-                                    '${constants.ip}/rest/files?fileRef=${widget.beer.image}&access_token=${widget.accessToken}',
-                                width: 115,
-                                fit: BoxFit.fill)
-                            : CachedNetworkImage(
-                                imageUrl: 'http://via.placeholder.com/125x250',
-                                fit: BoxFit.scaleDown)),
+                        child: Container(
+                          decoration:
+                              BoxDecoration(border: Border.all(width: 1)),
+                          child: widget.bar.image != null
+                              ? CachedNetworkImage(
+                                  imageUrl:
+                                      '${constants.ip}/rest/files?fileRef=${widget.bar.image}&access_token=${widget.accessToken}',
+                                  width: 115,
+                                  fit: BoxFit.fill)
+                              : CachedNetworkImage(
+                                  imageUrl:
+                                      'http://via.placeholder.com/250x160',
+                                  fit: BoxFit.scaleDown),
+                        )),
                     Positioned(
-                        child: AutoSizeText(widget.beer.name, minFontSize: 24)),
+                        child: AutoSizeText(widget.bar.name, minFontSize: 24)),
                     Positioned(
                         top: 35,
-                        child: () {
-                          String tipo = widget.beer.iDBeerType?.name ?? '';
-                          String ibus = widget.beer.iBUs.toString();
-                          if (tipo == '' && ibus != '') {
-                            return AutoSizeText('$ibus IBUs', minFontSize: 18);
-                          }
-                          if (ibus == '' && tipo != '') {
-                            return AutoSizeText(tipo, minFontSize: 18);
-                          }
-                          return AutoSizeText('$tipo - $ibus IBUs',
-                              minFontSize: 18);
-                        }()),
+                        child: AutoSizeText(widget.bar.iDBarType?.name ?? '',
+                            minFontSize: 18)),
                     Positioned(
                         top: 65,
                         child: SizedBox(
                             width: 150,
                             child: AutoSizeText(
-                              widget.beer.description ?? '',
+                              widget.bar.description ?? '',
                               minFontSize: 14,
                               style:
                                   const TextStyle(fontStyle: FontStyle.italic),
@@ -150,8 +137,8 @@ class _BeerCardState extends State<BeerCard> {
 
   void _handleFav() {
     _fav != true
-        ? RemoteApi.postBeerFav(widget.beer.id)
-        : RemoteApi.deleteBeerFav(widget.beer.id);
+        ? RemoteApi.postBarFav(widget.bar.id)
+        : RemoteApi.deleteBarFav(widget.bar.id);
     setState(() {
       _fav = !_fav;
     });

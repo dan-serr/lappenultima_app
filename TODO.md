@@ -1,5 +1,9 @@
 ## TODO
 
+- Poner en beer detail lista de bares en la que se encuentra ¿request y query?
+- Poner en bar detail lista de cervezas
+- ¿Posible nueva card para estas vistas?
+
 
 
 ---- REQUEST BODY DE INSERT EN RATING

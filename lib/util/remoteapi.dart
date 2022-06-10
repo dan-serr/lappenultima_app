@@ -6,6 +6,8 @@ import 'package:lappenultima_app/util/constants.dart' as constants;
 import 'package:lappenultima_app/models/beer.dart';
 import 'package:http/http.dart' as http;
 
+import '../models/bar.dart';
+
 class RemoteApi {
   static const FlutterSecureStorage _secureStorage = FlutterSecureStorage();
 
@@ -37,9 +39,33 @@ class RemoteApi {
     }
   }
 
-  /*
-  static Future<List<Bar>> fetchBars(int offset, int size, [String? searchTerm]) async { //TODO
-    }*/
+  static Future<List<Bar>> fetchBars(int offset, int size,
+      [String? searchTerm]) async {
+    String? accessToken = await _secureStorage.read(key: 'access_token');
+    var headers = {
+      'Authorization': 'Bearer $accessToken',
+      //'Cookie': 'SESSION=ODZlNWZmMmMtNWNiYi00MzE1LTg4YjYtMjFmZjhiMmU1NTY3'
+    };
+    searchTerm ??= '';
+    http.Request request;
+    request = http.Request(
+        'GET',
+        Uri.parse(
+            '${constants.ip}/rest/queries/BarDatum/barFilterName?name=$searchTerm&limit=$size&offset=$offset'));
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+    if (response.statusCode == 200) {
+      List<dynamic> iterable =
+          jsonDecode(await response.stream.bytesToString());
+      List<Bar> bars =
+          List<Bar>.from(iterable.map((model) => Bar.fromJson(model)));
+      return bars;
+    } else {
+      return <Bar>[];
+    }
+  }
 
   static Future<bool> isBeerFav(int beer) async {
     String? accessToken = await _secureStorage.read(key: 'access_token');
@@ -187,7 +213,7 @@ class RemoteApi {
       //'Cookie': 'SESSION=M2U5OGFkYmEtOTgwMy00MWY2LTk4ZjMtNjQ0ZGFlMzFlNWE0'
     };
     var request =
-        http.Request('GET', Uri.parse('${constants.ip}/fav/bar/$user'));
+        http.Request('GET', Uri.parse('${constants.ip}/fav/bar/$user/$bar'));
 
     request.headers.addAll(headers);
 
@@ -284,7 +310,46 @@ class RemoteApi {
     }
   }
 
-  static Future<void> deleteBarFav(int bar) async {}
+  static Future<void> deleteBarFav(int bar) async {
+    String? accessToken = await _secureStorage.read(key: 'access_token');
+    String? user = await _secureStorage.read(key: 'user_id');
+    var headers = {
+      'Authorization': 'Bearer $accessToken',
+      //'Cookie': 'SESSION=YmNlODIzMzEtMzhkOS00OWMyLWE2MzQtZjkwNGJkZTQwNWE5'
+    };
+    var request =
+        http.Request('DELETE', Uri.parse('${constants.ip}/fav/bar/$user/$bar'));
+    request.headers.addAll(headers);
 
-  static Future<void> deleteBarRating(int bar) async {}
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      print(await response.stream.bytesToString());
+    } else {
+      print(response.reasonPhrase);
+    }
+  }
+
+  static Future<void> deleteBarRating(int bar) async {
+    String? accessToken = await _secureStorage.read(key: 'access_token');
+    String? user = await _secureStorage.read(key: 'user_id');
+    var headers = {
+      'Authorization': 'Bearer $accessToken',
+      //'Cookie': 'SESSION=M2U5OGFkYmEtOTgwMy00MWY2LTk4ZjMtNjQ0ZGFlMzFlNWE0'
+    };
+    var request = http.Request(
+        'DELETE', Uri.parse('${constants.ip}/rating/bar/$user/$bar'));
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+    print(await response.stream.bytesToString());
+  }
+
+  static void logoutAction() async {
+    await _secureStorage.delete(key: 'user_id');
+    await _secureStorage.delete(key: 'access_token');
+    await _secureStorage.delete(key: 'refresh_token');
+  }
 }
+

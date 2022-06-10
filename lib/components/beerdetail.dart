@@ -138,7 +138,6 @@ class _BeerDetailState extends State<BeerDetail> {
                                   }
                                 }
                                 return const Icon(Icons.error, size: 20);
-                                //return const SizedBox(height: 1);
                               }),
                         ],
                       ),

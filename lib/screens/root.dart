@@ -22,10 +22,32 @@ class _RootPageState extends State<RootPage> {
 
   static int _selectedIndex = 0;
 
+  late PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[_selectedIndex],
+      body: GestureDetector(
+          onHorizontalDragEnd: (details) {
+            if (details.primaryVelocity! < 0) {
+              _handleRight();
+            }
+            if (details.primaryVelocity! > 0) {
+              _handleLeft();
+            }
+          },
+          child: PageView(
+              controller: _pageController,
+              onPageChanged: (index) {
+                setState(() => _selectedIndex = index);
+              },
+              children: _pages)),
       bottomNavigationBar: BottomNavigationBar(
         onTap: _onItemTapped,
         selectedItemColor: Theme.of(context).colorScheme.primary,
@@ -52,6 +74,34 @@ class _RootPageState extends State<RootPage> {
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+      _pageController.animateToPage(index,
+          duration: const Duration(milliseconds: 500), curve: Curves.easeOut);
     });
+  }
+
+  void _handleRight() {
+    if (_selectedIndex < _pages.length - 1) {
+      setState(() {
+        _selectedIndex++;
+        _pageController.animateToPage(_selectedIndex,
+            duration: const Duration(milliseconds: 500), curve: Curves.easeOut);
+      });
+    }
+  }
+
+  void _handleLeft() {
+    if (_selectedIndex > 0) {
+      setState(() {
+        _selectedIndex--;
+        _pageController.animateToPage(_selectedIndex,
+            duration: const Duration(milliseconds: 500), curve: Curves.easeOut);
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 }

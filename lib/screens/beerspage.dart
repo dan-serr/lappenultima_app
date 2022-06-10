@@ -25,7 +25,7 @@ class _BeersPageState extends State<BeersPage> {
 
   String? _accessToken;
 
-  static const _pageSize = 2;
+  static const _pageSize = 5;
   final PagingController<int, Beer> _pagingController =
       PagingController(firstPageKey: 0);
 
