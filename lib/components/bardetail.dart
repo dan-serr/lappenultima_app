@@ -99,7 +99,8 @@ class _BarDetailState extends State<BarDetail> {
                           )),
                       const SizedBox(height: 10),
                       Visibility(
-                          visible: !(widget.bar.pluscode == '' || widget.bar.pluscode == null),
+                          visible: !(widget.bar.pluscode == '' ||
+                              widget.bar.pluscode == null),
                           child: GestureDetector(
                             onTap: _openMaps,
                             child: AutoSizeText(

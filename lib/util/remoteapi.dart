@@ -351,5 +351,29 @@ class RemoteApi {
     await _secureStorage.delete(key: 'access_token');
     await _secureStorage.delete(key: 'refresh_token');
   }
-}
 
+  static Future<List<Bar>> getBarsWithBeer(int beer) async {
+    String? accessToken = await _secureStorage.read(key: 'access_token');
+    var headers = {
+      'Authorization': 'Bearer $accessToken',
+      //'Cookie': 'SESSION=MjMxNjI4OWMtYTNlZC00YmJkLTg3MDgtNTdmZmRiYWViZDM0'
+    };
+    var request = http.Request(
+        'GET',
+        Uri.parse(
+            '${constants.ip}/rest/queries/BarDatum/barsWithBeer?beer=$beer&limit=10'));
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      List<dynamic> iterable =
+          jsonDecode(await response.stream.bytesToString());
+      List<Bar> bars =
+          List<Bar>.from(iterable.map((model) => Bar.fromJson(model)));
+      return bars;
+    } else {
+      return <Bar>[];
+    }
+  }
+}

@@ -7,6 +7,9 @@ import 'package:lappenultima_app/util/constants.dart' as constants;
 import 'package:lappenultima_app/util/remoteapi.dart';
 import 'package:rating_dialog/rating_dialog.dart';
 
+import '../models/bar.dart';
+import 'barcard.dart';
+
 class BeerDetail extends StatefulWidget {
   const BeerDetail({Key? key, required this.accessToken, required this.beer})
       : super(key: key);
@@ -22,14 +25,17 @@ class _BeerDetailState extends State<BeerDetail> {
   late Future<bool> _futureFav;
   late Future<bool> _futureRated;
   late Future<int> _futureRating;
+  late Future<List<Bar>> _futureBars;
 
   late bool _fav;
   late bool _rated;
   late int _rating;
+  late List<Bar> _bars;
 
   bool _firstLoadFav = true;
   bool _firstLoadRated = true;
   bool _firstLoadRating = true;
+  bool _firstLoadBars = true;
 
   @override
   void initState() {
@@ -37,6 +43,7 @@ class _BeerDetailState extends State<BeerDetail> {
     _futureFav = RemoteApi.isBeerFav(widget.beer.id);
     _futureRated = RemoteApi.isBeerRated(widget.beer.id);
     _futureRating = RemoteApi.getBeerRating(widget.beer.id);
+    _futureBars = RemoteApi.getBarsWithBeer(widget.beer.id);
   }
 
   @override
@@ -65,14 +72,18 @@ class _BeerDetailState extends State<BeerDetail> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    widget.beer.image != null
-                        ? CachedNetworkImage(
-                            imageUrl:
-                                '${constants.ip}/rest/files?fileRef=${widget.beer.image}&access_token=${widget.accessToken}',
-                            width: 125)
-                        : CachedNetworkImage(
-                            imageUrl: 'http://via.placeholder.com/125x250',
-                            fit: BoxFit.scaleDown),
+                    SizedBox(
+                      width: 125,
+                      height: 250,
+                      child: widget.beer.image != null
+                          ? CachedNetworkImage(
+                              imageUrl:
+                                  '${constants.ip}/rest/files?fileRef=${widget.beer.image}&access_token=${widget.accessToken}',
+                              fit: BoxFit.fitHeight)
+                          : CachedNetworkImage(
+                              imageUrl: 'http://via.placeholder.com/125x250',
+                              fit: BoxFit.scaleDown),
+                    ),
                     Expanded(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -84,29 +95,33 @@ class _BeerDetailState extends State<BeerDetail> {
                                 'Tipo: ${widget.beer.iDBeerType?.name}',
                                 wrapWords: true,
                               )),
-                          const SizedBox(height: 10),
+                          SizedBox(
+                              height: widget.beer.iDBeerType != null ? 10 : 0),
                           Visibility(
-                              visible: widget.beer.description != '',
+                              visible: widget.beer.iBUs != null,
                               child: AutoSizeText(
                                 'IBUs: ${widget.beer.iBUs}',
                                 wrapWords: true,
                               )),
-                          const SizedBox(height: 10),
+                          SizedBox(height: widget.beer.iBUs != null ? 10 : 0),
                           Visibility(
                               visible: widget.beer.iDBeerCompany != null,
                               child: AutoSizeText(
                                 'Compañía: ${widget.beer.iDBeerCompany?.name}, ${widget.beer.iDBeerCompany?.country}',
                                 wrapWords: true,
                               )),
-                          const SizedBox(height: 10),
+                          SizedBox(
+                              height:
+                                  widget.beer.iDBeerCompany != null ? 10 : 0),
                           Visibility(
-                            visible: widget.beer.description != '',
+                            visible: widget.beer.description != null,
                             child: AutoSizeText(
                               'Descripción: ${widget.beer.description}',
                               wrapWords: true,
                             ),
                           ),
-                          const SizedBox(height: 10),
+                          SizedBox(
+                              height: widget.beer.description != null ? 10 : 0),
                           FutureBuilder(
                               future: _futureRating,
                               builder: (context, snapshot) {
@@ -234,7 +249,74 @@ class _BeerDetailState extends State<BeerDetail> {
                   ),
                 ),
               ),
-              //TODO: Añadir ver lista de bares donde está dicha cerveza o ->> meter en un scroll row <<-
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  const Divider(),
+                  const SizedBox(height: 10),
+                  Center(
+                    child: SizedBox(
+                      child: FutureBuilder(
+                          future: _futureBars,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const CircularProgressIndicator();
+                            } else if (snapshot.connectionState ==
+                                ConnectionState.done) {
+                              if (snapshot.hasData) {
+                                if (_firstLoadBars) {
+                                  _bars = snapshot.data as List<Bar>;
+                                  _firstLoadBars = false;
+                                }
+                                return Padding(
+                                    padding:
+                                        const EdgeInsets.fromLTRB(8, 4, 8, 0),
+                                    child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          _bars.isNotEmpty
+                                              ? const Text(
+                                                  'Bares donde puedes encontrarla:')
+                                              : const SizedBox(
+                                                  height: 1,
+                                                ),
+                                          Expanded(
+                                            flex: 0,
+                                            child: SizedBox(
+                                              height: 320,
+                                              child: ListView.builder(
+                                                  shrinkWrap: true,
+                                                  physics:
+                                                      const ClampingScrollPhysics(),
+                                                  scrollDirection:
+                                                      Axis.horizontal,
+                                                  padding:
+                                                      const EdgeInsets.all(8),
+                                                  itemCount: _bars.length,
+                                                  itemBuilder:
+                                                      (BuildContext context,
+                                                          int index) {
+                                                    return BarCard(
+                                                        bar: _bars[index],
+                                                        accessToken:
+                                                            widget.accessToken,
+                                                        width: 250);
+                                                  }),
+                                            ),
+                                          )
+                                        ]));
+                              }
+                            }
+                            return const Icon(Icons.error, size: 40);
+                          }),
+                    ),
+                  ),
+                ],
+              )
             ])),
           ),
         ),

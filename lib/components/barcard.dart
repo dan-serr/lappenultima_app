@@ -9,11 +9,18 @@ import '../util/constants.dart' as constants;
 import 'bardetail.dart';
 
 class BarCard extends StatefulWidget {
-  const BarCard({Key? key, required this.bar, required this.accessToken})
+  const BarCard(
+      {Key? key,
+      required this.bar,
+      required this.accessToken,
+      this.width = 350,
+      this.height = 250})
       : super(key: key);
 
   final Bar bar;
   final String accessToken;
+  final double width;
+  final double height;
 
   @override
   State<BarCard> createState() => _BarCardState();
@@ -46,8 +53,8 @@ class _BarCardState extends State<BarCard> {
             padding: const EdgeInsets.fromLTRB(10, 12.5, 10, 7.5),
             child: Container(
                 padding: const EdgeInsets.all(16),
-                constraints:
-                    const BoxConstraints.expand(width: 350, height: 250),
+                constraints: BoxConstraints.expand(
+                    width: widget.width, height: widget.height),
                 decoration: const BoxDecoration(
                     gradient: LinearGradient(
                         begin: Alignment.topLeft,
