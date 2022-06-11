@@ -31,11 +31,11 @@ class _BeersPageState extends State<BeersPage> {
 
   @override
   void initState() {
+    super.initState();
     _secureStorage = const FlutterSecureStorage();
     _searchController = TextEditingController();
     _pagingController
         .addPageRequestListener((pageKey) async => await _fetchPage(pageKey));
-    super.initState();
   }
 
   Future<void> _fetchPage(int pageKey) async {
@@ -94,7 +94,6 @@ class _BeersPageState extends State<BeersPage> {
                   Expanded(
                       child: PagedGridView(
                           pagingController: _pagingController,
-                          //separatorBuilder: (context, index) => const Divider(),
                           gridDelegate: SliverWovenGridDelegate.count(
                             crossAxisCount: 1,
                             crossAxisSpacing: 12,
@@ -113,18 +112,6 @@ class _BeersPageState extends State<BeersPage> {
                 ]),
           ),
         ));
-    /*Center(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: const [
-              Text('BeersPage'),
-            ],
-          ),
-        )
-      ), */
   }
 
   void _updateSearchTerm(String searchTerm) {

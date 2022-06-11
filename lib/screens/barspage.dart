@@ -22,7 +22,8 @@ class _BarsPageState extends State<BarsPage> {
   String? _searchTerm;
 
   String? _accessToken;
-  static const _pageSize = 4;
+
+  static const _pageSize = 10;
   final PagingController<int, Bar> _pagingController =
       PagingController(firstPageKey: 0);
 

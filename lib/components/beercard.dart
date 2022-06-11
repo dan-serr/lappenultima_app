@@ -76,15 +76,19 @@ class _BeerCardState extends State<BeerCard> {
                   children: [
                     Positioned(
                         right: 15,
-                        child: widget.beer.image != null
-                            ? CachedNetworkImage(
-                                imageUrl:
-                                    '${constants.ip}/rest/files?fileRef=${widget.beer.image}&access_token=${widget.accessToken}',
-                                width: 115,
-                                fit: BoxFit.fill)
-                            : CachedNetworkImage(
-                                imageUrl: 'http://via.placeholder.com/125x250',
-                                fit: BoxFit.scaleDown)),
+                        child: SizedBox(
+                          width: 125,
+                          height: 250,
+                          child: widget.beer.image != null
+                              ? CachedNetworkImage(
+                                  imageUrl:
+                                      '${constants.ip}/rest/files?fileRef=${widget.beer.image}&access_token=${widget.accessToken}',
+                                  width: 115,
+                                  fit: BoxFit.fitHeight)
+                              : CachedNetworkImage(
+                                  imageUrl: 'http://via.placeholder.com/125x250',
+                                  fit: BoxFit.scaleDown),
+                        )),
                     Positioned(
                         child: AutoSizeText(widget.beer.name, minFontSize: 24)),
                     Positioned(

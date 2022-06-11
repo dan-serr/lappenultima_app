@@ -69,6 +69,7 @@ class _BarCardState extends State<BarCard> {
                         bottom: 5,
                         right: 15,
                         child: Container(
+                          width: 250,
                           decoration:
                               BoxDecoration(border: Border.all(width: 1)),
                           child: widget.bar.image != null
@@ -76,7 +77,7 @@ class _BarCardState extends State<BarCard> {
                                   imageUrl:
                                       '${constants.ip}/rest/files?fileRef=${widget.bar.image}&access_token=${widget.accessToken}',
                                   width: 115,
-                                  fit: BoxFit.fill)
+                                  fit: BoxFit.fitWidth)
                               : CachedNetworkImage(
                                   imageUrl:
                                       'http://via.placeholder.com/250x160',

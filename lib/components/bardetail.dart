@@ -103,7 +103,7 @@ class _BarDetailState extends State<BarDetail> {
                           child: GestureDetector(
                             onTap: _openMaps,
                             child: AutoSizeText(
-                              'Pluscode: ${widget.bar.pluscode}',
+                              'Abrir en Maps',
                               wrapWords: true,
                               style: TextStyle(
                                   color: Theme.of(context).colorScheme.primary),
