@@ -35,66 +35,143 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _secureStorage = const FlutterSecureStorage();
-    _futureUser = _getUserData();
-    _futureBeer = RemoteApi.getBeerMostRated();
-    _futureBar = RemoteApi.getBarMostRated();
+    _futureUser = Future.sync(() => _getUserData());
+    _futureBeer = Future.sync(() => RemoteApi.getBeerMostRated());
+    _futureBar = Future.sync(() => RemoteApi.getBarMostRated());
   }
 
   final List<String> _menuItems = <String>['Cerrar sesión'];
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: _futureUser,
-      builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-        return Scaffold(
-          appBar: AppBar(title: const Text('lappenultima'), actions: [
-            PopupMenuButton(
-                itemBuilder: (context) =>
-                    _menuItems
-                        .map((choice) =>
-                        PopupMenuItem(value: choice, child: Text(choice)))
-                        .toList(),
-                onSelected: _onSelectedMenu)
-          ]),
-          body: SafeArea(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0.0, 6.0, 0.0, 0.0),
-                    child: AutoSizeText('¡Bienvenido $user!', textAlign: TextAlign.center, style: Theme.of(context).textTheme.headline4),
-                  ),
-                  const Divider(height: 15,),
-                  AutoSizeText('Te puede interesar ', style: Theme.of(context).textTheme.bodyText1, textAlign: TextAlign.center,),
-                  Container(
-                      padding: const EdgeInsets.fromLTRB(14.0, 10.0, 14.0, 8.0),
-                      margin: const EdgeInsets.fromLTRB(14.0, 10.0, 14.0, 8.0),
-                      child: Card(
-                          elevation: 4.0,
-                          child: Container(
-                              decoration: BoxDecoration(
-                                  border: Border.all(
-                                      color: Theme
-                                          .of(context)
-                                          .colorScheme
-                                          .primaryContainer,
-                                      width: 2),
-                                  borderRadius:
-                                  const BorderRadius.all(Radius.circular(10))),
-                              child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
+        future: _futureUser,
+        builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+          return Scaffold(
+            appBar: AppBar(title: const Text('lappenultima'), actions: [
+              PopupMenuButton(
+                  itemBuilder: (context) => _menuItems
+                      .map((choice) =>
+                          PopupMenuItem(value: choice, child: Text(choice)))
+                      .toList(),
+                  onSelected: _onSelectedMenu)
+            ]),
+            body: SafeArea(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0.0, 6.0, 0.0, 0.0),
+                      child: AutoSizeText(
+                          user != '' ? '¡Bienvenido $user!' : '¡Bienvenido!',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.headline4),
+                    ),
+                    const Divider(
+                      height: 15,
+                    ),
+                    AutoSizeText(
+                      'Te puede interesar ',
+                      style: Theme.of(context).textTheme.bodyText1,
+                      textAlign: TextAlign.center,
+                    ),
+                    Container(
+                        padding:
+                            const EdgeInsets.fromLTRB(14.0, 10.0, 14.0, 8.0),
+                        margin:
+                            const EdgeInsets.fromLTRB(14.0, 10.0, 14.0, 8.0),
+                        child: Card(
+                            elevation: 4.0,
+                            child: Container(
+                                decoration: BoxDecoration(
+                                    border: Border.all(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primaryContainer,
+                                        width: 2),
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(10))),
+                                child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                        margin: const EdgeInsets.fromLTRB(0, 5, 0, 0),
+                                        child: AutoSizeText('La cerveza del momento',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .headline5,
+                                            textAlign: TextAlign.center),
+                                      ),
+                                      const Divider(height: 5),
+                                      FutureBuilder(
+                                        future: _futureBeer,
+                                        builder: (context, snapshot) {
+                                          if (snapshot.connectionState ==
+                                              ConnectionState.waiting) {
+                                            return const CircularProgressIndicator();
+                                          } else if (snapshot.connectionState ==
+                                              ConnectionState.done) {
+                                            if (snapshot.hasError) {
+                                              return Text('${snapshot.error}');
+                                            }
+                                            if (snapshot.hasData) {
+                                              if (_firstLoadBeer) {
+                                                _beer = snapshot.data as Beer?;
+                                                _firstLoadBeer = false;
+                                              }
+                                              return _beer != null
+                                                  ? Padding(
+                                                    padding: const EdgeInsets.all(16.0),
+                                                    child: BeerCard(
+                                                        beer: _beer!,
+                                                        accessToken: accessToken!),
+                                                  )
+                                                  : const Padding(
+                                                      padding:
+                                                          EdgeInsets.all(8.0),
+                                                      child: Placeholder(),
+                                                    ); //todo placeholder asset
+                                            }
+                                          }
+                                          return const Icon(Icons.error,
+                                              size:
+                                                  40); //TODO placeholder asset
+                                        },
+                                      ),
+                                    ])))),
+                    const Divider(
+                      height: 15,
+                    ),
+                    Container(
+                        padding:
+                            const EdgeInsets.fromLTRB(14.0, 10.0, 14.0, 8.0),
+                        margin:
+                            const EdgeInsets.fromLTRB(14.0, 10.0, 14.0, 8.0),
+                        child: Container(
+                            decoration: BoxDecoration(
+                                border: Border.all(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .primaryContainer,
+                                    width: 2),
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(10))),
+                            child: Card(
+                                elevation: 4.0,
+                                child: Column(
                                   children: [
-                                    AutoSizeText('La cerveza del momento',
-                                        style:
-                                        Theme
-                                            .of(context)
-                                            .textTheme
-                                            .headline5,
-                                        textAlign: TextAlign.center),
+                                    Container(
+                                      margin: const EdgeInsets.fromLTRB(0, 5.0, 0, 0),
+                                      child: AutoSizeText('El bar del momento',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .headline5,
+                                          textAlign: TextAlign.center),
+                                    ),
                                     const Divider(height: 5),
                                     FutureBuilder(
-                                      future: _futureBeer,
+                                      future: _futureBar,
                                       builder: (context, snapshot) {
                                         if (snapshot.connectionState ==
                                             ConnectionState.waiting) {
@@ -105,92 +182,37 @@ class _HomePageState extends State<HomePage> {
                                             return Text('${snapshot.error}');
                                           }
                                           if (snapshot.hasData) {
-                                            if (_firstLoadBeer) {
-                                              _beer = snapshot.data as Beer?;
-                                              _firstLoadBeer = false;
+                                            if (_firstLoadBar) {
+                                              _bar = snapshot.data as Bar?;
+                                              _firstLoadBar = false;
                                             }
-                                            return _beer != null
-                                                ? BeerCard(
-                                                beer: _beer!,
-                                                accessToken: accessToken!)
+                                            return _bar != null
+                                                ? Padding(
+                                                  padding: const EdgeInsets.all(16.0),
+                                                  child: BarCard(
+                                                      bar: _bar!,
+                                                      accessToken: accessToken!,
+                                                    ),
+                                                )
                                                 : const Padding(
-                                              padding: EdgeInsets.all(8.0),
-                                              child: Placeholder(),
-                                            ); //todo placeholder asset
+                                                    padding:
+                                                        EdgeInsets.all(8.0),
+                                                    child: Placeholder(),
+                                                  ); //todo placeholder asset
                                           }
                                         }
                                         return const Icon(Icons.error,
                                             size: 40); //TODO placeholder asset
                                       },
-                                    ),
-                                  ])))),
-                  const Divider(
-                    height: 15,
-                  ),
-                  Container(
-                      padding: const EdgeInsets.fromLTRB(14.0, 10.0, 14.0, 8.0),
-                      margin: const EdgeInsets.fromLTRB(14.0, 10.0, 14.0, 8.0),
-                      child: Container(
-                          decoration: BoxDecoration(
-                              border: Border.all(
-                                  color: Theme
-                                      .of(context)
-                                      .colorScheme
-                                      .primaryContainer,
-                                  width: 2),
-                              borderRadius:
-                              const BorderRadius.all(Radius.circular(10))),
-                          child: Card(
-                              elevation: 4.0,
-                              child: Column(
-                                children: [
-                                  AutoSizeText('El bar del momento',
-                                      style: Theme
-                                          .of(context)
-                                          .textTheme
-                                          .headline5,
-                                      textAlign: TextAlign.center),
-                                  const Divider(height: 5),
-                                  FutureBuilder(
-                                    future: _futureBar,
-                                    builder: (context, snapshot) {
-                                      if (snapshot.connectionState ==
-                                          ConnectionState.waiting) {
-                                        return const CircularProgressIndicator();
-                                      } else if (snapshot.connectionState ==
-                                          ConnectionState.done) {
-                                        if (snapshot.hasError) {
-                                          return Text('${snapshot.error}');
-                                        }
-                                        if (snapshot.hasData) {
-                                          if (_firstLoadBar) {
-                                            _bar = snapshot.data as Bar?;
-                                            _firstLoadBar = false;
-                                          }
-                                          return _bar != null
-                                              ? BarCard(
-                                            bar: _bar!,
-                                            accessToken: accessToken!,
-                                          )
-                                              : const Padding(
-                                            padding: EdgeInsets.all(8.0),
-                                            child: Placeholder(),
-                                          ); //todo placeholder asset
-                                        }
-                                      }
-                                      return const Icon(Icons.error,
-                                          size: 40); //TODO placeholder asset
-                                    },
-                                  )
-                                ],
-                              ))))
-                ],
+                                    )
+                                  ],
+                                ))))
+                  ],
+                ),
               ),
             ),
-          ),
-        );
-      }
-    );
+          );
+        });
   }
 
   void _onSelectedMenu(String choice) {

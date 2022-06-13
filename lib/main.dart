@@ -11,7 +11,6 @@ void main() {
 class Appenultima extends StatelessWidget {
   const Appenultima({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

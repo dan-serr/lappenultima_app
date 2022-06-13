@@ -7,6 +7,7 @@ import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:lappenultima_app/components/beercard.dart';
 import 'package:lappenultima_app/models/beer.dart';
 import 'package:http/http.dart' as http;
+import 'package:lappenultima_app/models/beertype.dart';
 import 'package:lappenultima_app/util/remoteapi.dart';
 
 class BeersPage extends StatefulWidget {
@@ -25,6 +26,10 @@ class _BeersPageState extends State<BeersPage> {
 
   String? _accessToken;
 
+  late Future<List<BeerType>> _futureTypeList;
+  late List<BeerType> _beerTypeFilterList;
+  BeerType? _beerTypeFilter;
+
   static const _pageSize = 6;
   final PagingController<int, Beer> _pagingController =
       PagingController(firstPageKey: 0);
@@ -34,6 +39,7 @@ class _BeersPageState extends State<BeersPage> {
     super.initState();
     _secureStorage = const FlutterSecureStorage();
     _searchController = TextEditingController();
+    _futureTypeList = RemoteApi.getBeerTypes();
     _pagingController
         .addPageRequestListener((pageKey) async => await _fetchPage(pageKey));
   }
@@ -68,24 +74,29 @@ class _BeersPageState extends State<BeersPage> {
                         icon: Icon(Icons.search), hintText: 'Buscar cerveza'),
                   ),
             actions: <Widget>[
-              Padding(
-                padding: const EdgeInsets.only(right: 12.5),
-                child: IconButton(
+              IconButton(
                   onPressed: () {
-                    _searchController.clear();
                     _updateSearchTerm('');
-                    setState(() {
-                      _isSearching = !_isSearching;
-                    });
+                    _pickFilter();
                   },
-                  icon: !_isSearching
-                      ? const Icon(Icons.search)
-                      : const Icon(Icons.cancel),
-                ),
+                  icon: const Icon(Icons.filter_alt)),
+              IconButton(
+                onPressed: () {
+                  _searchController.clear();
+                  _updateSearchTerm('');
+                  setState(() {
+                    _isSearching = !_isSearching;
+                  });
+                },
+                icon: !_isSearching
+                    ? const Icon(Icons.search)
+                    : const Icon(Icons.cancel),
               ),
             ]),
         body: RefreshIndicator(
-          onRefresh: () => Future.sync(() => _pagingController.refresh()),
+          onRefresh: () => Future.sync(() {
+            _pagingController.refresh();
+          }),
           child: Center(
             child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -120,5 +131,59 @@ class _BeersPageState extends State<BeersPage> {
     _searchController.dispose();
     _pagingController.dispose();
     super.dispose();
+  }
+
+  void _pickFilter() {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Filtrar por tipo de cerveza',
+                textAlign: TextAlign.center),
+            content: SizedBox(
+              height: 350,
+              width: 300,
+              child: FutureBuilder(
+                  future: _futureTypeList,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator();
+                    } else if (snapshot.connectionState ==
+                        ConnectionState.done) {
+                      if (snapshot.hasError) {
+                        return Text('${snapshot.error}');
+                      }
+                      if (snapshot.hasData) {
+                        _beerTypeFilterList = snapshot.data as List<BeerType>;
+                        return ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: _beerTypeFilterList.length,
+                            itemBuilder: (context, index) {
+                              return ListTile(
+                                onTap: () {
+                                  _beerTypeFilter = _beerTypeFilterList[index];
+                                  if (_beerTypeFilter != null) {
+                                    _pagingController.itemList =
+                                        _pagingController.itemList
+                                            ?.where((element) =>
+                                                element.iDBeerType!.id ==
+                                                _beerTypeFilter!.id)
+                                            .toList();
+                                  }
+                                  Navigator.of(context).pop();
+                                },
+                                title: Text(
+                                  _beerTypeFilterList[index].name,
+                                  textAlign: TextAlign.center,
+                                ),
+                              );
+                            });
+                      }
+                    }
+                    return const Icon(Icons.error, size: 40);
+                  }),
+            ),
+          );
+        });
   }
 }

@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:lappenultima_app/models/bartype.dart';
+import 'package:lappenultima_app/models/beertype.dart';
 import 'package:lappenultima_app/util/constants.dart' as constants;
 import 'package:lappenultima_app/models/beer.dart';
 import 'package:http/http.dart' as http;
@@ -208,6 +210,30 @@ class RemoteApi {
   }
 
   static Future<Beer?> getBeerMostRated() async {
+    int? beer = await _getBeerId();
+    if (beer != null) {
+      String? accessToken = await _secureStorage.read(key: 'access_token');
+      var headers = {
+        'Authorization': 'Bearer $accessToken',
+        //'Cookie': 'SESSION=MDY3Y2IzNmMtMGEyNC00YWM0LTk3NjEtZTBkNDdmZjBlNzFk'
+      };
+      var request = http.Request(
+          'GET',
+          Uri.parse(
+              '${constants.ip}/rest/entities/BeerDatum/$beer?fetchPlan=beerDatum-fetch-plan'));
+
+      request.headers.addAll(headers);
+
+      http.StreamedResponse response = await request.send();
+
+      if (response.statusCode == 200) {
+        return Beer.fromJson(jsonDecode(await response.stream.bytesToString()));
+      }
+    }
+    return null;
+  }
+
+  static Future<int?> _getBeerId() async {
     String? accessToken = await _secureStorage.read(key: 'access_token');
     var headers = {
       'Authorization': 'Bearer $accessToken',
@@ -221,9 +247,58 @@ class RemoteApi {
     http.StreamedResponse response = await request.send();
 
     if (response.statusCode == 200) {
-      return Beer.fromJson(jsonDecode(await response.stream.bytesToString()));
+      return int.parse(await response.stream.bytesToString());
     }
     return null;
+  }
+
+  static Future<List<BeerType>> getBeerTypes() async {
+    String? accessToken = await _secureStorage.read(key: 'access_token');
+    var headers = {
+      'Authorization': 'Bearer $accessToken',
+      //'Cookie': 'SESSION=NTI0YTU0NTItYjgxNC00ZDU3LTk3YmEtNjMxY2Y3NDEyODU2'
+    };
+    var request = http.Request(
+        'GET', Uri.parse('${constants.ip}/rest/queries/BeerType/beerTypes'));
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      List<dynamic> iterable =
+          jsonDecode(await response.stream.bytesToString());
+      List<BeerType> beerTypes = List<BeerType>.from(
+          iterable.map((model) => BeerType.fromJson(model)));
+      return beerTypes;
+    } else {
+      print(response.reasonPhrase);
+    }
+    return <BeerType>[];
+  }
+
+  static Future<List<Beer>> getBeersByType(int idBeerType) async {
+    String? accessToken = await _secureStorage.read(key: 'access_token');
+    var headers = {
+      'Authorization': 'Bearer $accessToken',
+      //'Cookie': 'SESSION=NTI0YTU0NTItYjgxNC00ZDU3LTk3YmEtNjMxY2Y3NDEyODU2'
+    };
+    var request = http.Request(
+        'GET',
+        Uri.parse(
+            '${constants.ip}/rest/queries/BeerDatum/beerByType?beerType=$idBeerType'));
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      List<dynamic> iterable =
+          jsonDecode(await response.stream.bytesToString());
+      List<Beer> beers =
+          List<Beer>.from(iterable.map((model) => Beer.fromJson(model)));
+    }
+    return <Beer>[];
   }
 
   //Bars
@@ -368,12 +443,6 @@ class RemoteApi {
     print(await response.stream.bytesToString());
   }
 
-  static void logoutAction() async {
-    //await _secureStorage.delete(key: 'user_id'); //No se borra para evitar que se quede a null: que se sobrescriba cuando entre uno nuevo TO FIX
-    await _secureStorage.delete(key: 'access_token');
-    await _secureStorage.delete(key: 'refresh_token');
-  }
-
   static Future<List<Bar>> getBarsWithBeer(int beer) async {
     String? accessToken = await _secureStorage.read(key: 'access_token');
     var headers = {
@@ -400,6 +469,30 @@ class RemoteApi {
   }
 
   static Future<Bar?> getBarMostRated() async {
+    int? bar = await _getBarId();
+    if (bar != null) {
+      String? accessToken = await _secureStorage.read(key: 'access_token');
+      var headers = {
+        'Authorization': 'Bearer $accessToken',
+        //'Cookie': 'SESSION=MDY3Y2IzNmMtMGEyNC00YWM0LTk3NjEtZTBkNDdmZjBlNzFk'
+      };
+      var request = http.Request(
+          'GET',
+          Uri.parse(
+              '${constants.ip}/rest/entities/BarDatum/$bar?fetchPlan=barDatum-fetch-plan'));
+
+      request.headers.addAll(headers);
+
+      http.StreamedResponse response = await request.send();
+
+      if (response.statusCode == 200) {
+        return Bar.fromJson(jsonDecode(await response.stream.bytesToString()));
+      }
+    }
+    return null;
+  }
+
+  static Future<int?> _getBarId() async {
     String? accessToken = await _secureStorage.read(key: 'access_token');
     var headers = {
       'Authorization': 'Bearer $accessToken',
@@ -413,8 +506,67 @@ class RemoteApi {
     http.StreamedResponse response = await request.send();
 
     if (response.statusCode == 200) {
-      return Bar.fromJson(jsonDecode(await response.stream.bytesToString()));
+      try {
+        return int.parse(await response.stream.bytesToString());
+      } catch (error) {
+        return null;
+      }
     }
     return null;
+  }
+
+  static Future<List<BarType>> getBarTypes() async {
+    String? accessToken = await _secureStorage.read(key: 'access_token');
+    var headers = {
+      'Authorization': 'Bearer $accessToken',
+      //'Cookie': 'SESSION=NTI0YTU0NTItYjgxNC00ZDU3LTk3YmEtNjMxY2Y3NDEyODU2'
+    };
+    var request = http.Request(
+        'GET', Uri.parse('${constants.ip}/rest/queries/BarType/barTypes'));
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      List<dynamic> iterable =
+          jsonDecode(await response.stream.bytesToString());
+      List<BarType> barTypes =
+          List<BarType>.from(iterable.map((model) => BarType.fromJson(model)));
+      return barTypes;
+    } else {
+      print(response.reasonPhrase);
+    }
+    return <BarType>[];
+  }
+
+  static Future<List<Bar>> getBarsByType(int idBarType) async {
+    String? accessToken = await _secureStorage.read(key: 'access_token');
+    var headers = {
+      'Authorization': 'Bearer $accessToken',
+      //'Cookie': 'SESSION=NTI0YTU0NTItYjgxNC00ZDU3LTk3YmEtNjMxY2Y3NDEyODU2'
+    };
+    var request = http.Request(
+        'GET',
+        Uri.parse(
+            '${constants.ip}/rest/queries/BarDatum/barByType?barType=$idBarType'));
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      List<dynamic> iterable =
+          jsonDecode(await response.stream.bytesToString());
+      List<Beer> beers =
+          List<Beer>.from(iterable.map((model) => Beer.fromJson(model)));
+    }
+    return <Bar>[];
+  }
+
+  static void logoutAction() async {
+    //await _secureStorage.delete(key: 'user_id'); //No se borra para evitar que se quede a null: que se sobrescriba cuando entre uno nuevo TO FIX
+    await _secureStorage.delete(key: 'access_token');
+    await _secureStorage.delete(key: 'refresh_token');
   }
 }

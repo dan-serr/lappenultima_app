@@ -167,7 +167,7 @@ class _LoginState extends State<Login> {
             key: 'access_token', value: mappedResponse['access_token']);
         await _secureStorage.write(
             key: 'refresh_token', value: mappedResponse['refresh_token']);
-        await _secureStorage.write(key: 'username', value: username);
+        await _secureStorage.write(key: 'username', value: _username);
         Future.sync(() => Navigator.pushReplacement(
             context,
             MaterialPageRoute<void>(
@@ -213,6 +213,7 @@ class _LoginState extends State<Login> {
     });
     try {
       final accessToken = await _secureStorage.read(key: "access_token");
+      _username = await _secureStorage.read(key: 'username');
       if (accessToken != null || accessToken!.isNotEmpty) {
         await _loginAccess(accessToken);
       }
@@ -247,7 +248,7 @@ class _LoginState extends State<Login> {
           jsonDecode(await response.stream.bytesToString())[0];
       await _secureStorage.write(key: 'user_id', value: mappedResponse['id']);
       await _secureStorage.write(
-          key: 'username', value: _usernameController.text);
+          key: 'username', value: _username);
       print(mappedResponse['id']);
       Future.sync(() => Navigator.pushReplacement(
           context,
@@ -285,7 +286,7 @@ class _LoginState extends State<Login> {
       await _secureStorage.write(
           key: 'refresh_token', value: mappedResponse['refresh_token']);
       await _secureStorage.write(
-          key: 'username', value: _usernameController.text);
+          key: 'username', value: _username);
       Future.sync(() => Navigator.pushReplacement(
           context,
           MaterialPageRoute<void>(
