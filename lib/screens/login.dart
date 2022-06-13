@@ -247,8 +247,7 @@ class _LoginState extends State<Login> {
       Map<String, dynamic> mappedResponse =
           jsonDecode(await response.stream.bytesToString())[0];
       await _secureStorage.write(key: 'user_id', value: mappedResponse['id']);
-      await _secureStorage.write(
-          key: 'username', value: _username);
+      await _secureStorage.write(key: 'username', value: _username);
       print(mappedResponse['id']);
       Future.sync(() => Navigator.pushReplacement(
           context,
@@ -285,8 +284,7 @@ class _LoginState extends State<Login> {
           key: 'access_token', value: mappedResponse['access_token']);
       await _secureStorage.write(
           key: 'refresh_token', value: mappedResponse['refresh_token']);
-      await _secureStorage.write(
-          key: 'username', value: _username);
+      await _secureStorage.write(key: 'username', value: _username);
       Future.sync(() => Navigator.pushReplacement(
           context,
           MaterialPageRoute<void>(
@@ -347,16 +345,21 @@ class _RegisterState extends State<Register> {
               onPressed: () => Navigator.of(context).pop(),
             ),
             title: const Text('Registro')),
-        body: Center(
-            child: Padding(
-                padding: const EdgeInsets.all(40),
-                child: SingleChildScrollView(
-                    child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                      const SizedBox(height: 12),
-                      TextField(
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(8.0, 40.0, 8.0, 4.0),
+            child: Center(
+              child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                    const Text('Rellena tus datos para registrarte',
+                        style: TextStyle(fontSize: 20),
+                        textAlign: TextAlign.center),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: 300,
+                      child: TextField(
                         controller: _usernameController,
                         obscureText: false,
                         decoration: InputDecoration(
@@ -365,8 +368,11 @@ class _RegisterState extends State<Register> {
                             errorText: _userErrorText),
                         onChanged: (text) => setState(() => _username = text),
                       ),
-                      const SizedBox(height: 36),
-                      TextField(
+                    ),
+                    const SizedBox(height: 36),
+                    SizedBox(
+                      width: 300,
+                      child: TextField(
                           controller: _emailController,
                           obscureText: false,
                           decoration: InputDecoration(
@@ -374,8 +380,11 @@ class _RegisterState extends State<Register> {
                               labelText: 'Correo electrónico',
                               errorText: _emailErrorText),
                           onChanged: (text) => setState(() => _email = text)),
-                      const SizedBox(height: 36),
-                      TextField(
+                    ),
+                    const SizedBox(height: 36),
+                    SizedBox(
+                      width: 300,
+                      child: TextField(
                         controller: _passwordController,
                         obscureText: _passwordVisible,
                         decoration: InputDecoration(
@@ -394,8 +403,11 @@ class _RegisterState extends State<Register> {
                             errorText: _passwordErrorText),
                         onChanged: (text) => setState(() => _password = text),
                       ),
-                      const SizedBox(height: 12),
-                      TextField(
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: 300,
+                      child: TextField(
                         controller: _checkPasswordController,
                         obscureText: _checkPasswordVisible,
                         decoration: InputDecoration(
@@ -416,30 +428,37 @@ class _RegisterState extends State<Register> {
                         onChanged: (text) =>
                             setState(() => _passwordCheck = text),
                       ),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                          width: 250,
-                          child: ElevatedButton(
-                              onPressed: () {
-                                if (_userErrorText == null &&
-                                    _emailErrorText == null &&
-                                    _passwordErrorText == null &&
-                                    _checkPasswordErrorText == null) {
-                                  _registerAction(
-                                      _username!, _email!, _password!);
-                                } else {
-                                  Fluttertoast.showToast(
-                                      msg:
-                                          'Comprueba que los campos estén rellenos y válidos.',
-                                      toastLength: Toast.LENGTH_SHORT,
-                                      gravity: ToastGravity.BOTTOM,
-                                      backgroundColor: Colors.white12,
-                                      textColor: Colors.white,
-                                      fontSize: 16.0);
-                                }
-                              },
-                              child: const Text('Registrar')))
-                    ])))));
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                        width: 300,
+                        child: ElevatedButton(
+                            onPressed: () {
+                              if (_userErrorText == null &&
+                                  _emailErrorText == null &&
+                                  _passwordErrorText == null &&
+                                  _checkPasswordErrorText == null) {
+                                _registerAction(
+                                    _username!, _email!, _password!);
+                              } else {
+                                Fluttertoast.showToast(
+                                    msg:
+                                        'Comprueba que los campos estén rellenos y válidos.',
+                                    toastLength: Toast.LENGTH_SHORT,
+                                    gravity: ToastGravity.BOTTOM,
+                                    backgroundColor: Colors.white12,
+                                    textColor: Colors.white,
+                                    fontSize: 16.0);
+                              }
+                            },
+                            child: const Text(
+                              'Registrar',
+                              style: TextStyle(fontSize: 20),
+                            )))
+                  ]),
+            ),
+          ),
+        ));
   }
 
   String? get _userErrorText {

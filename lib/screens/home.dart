@@ -40,7 +40,10 @@ class _HomePageState extends State<HomePage> {
     _futureBar = Future.sync(() => RemoteApi.getBarMostRated());
   }
 
-  final List<String> _menuItems = <String>['Cerrar sesión'];
+  final List<String> _menuItems = <String>[
+    //'Opciones',
+    'Cerrar sesión'
+  ];
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -96,8 +99,10 @@ class _HomePageState extends State<HomePage> {
                                         CrossAxisAlignment.center,
                                     children: [
                                       Container(
-                                        margin: const EdgeInsets.fromLTRB(0, 5, 0, 0),
-                                        child: AutoSizeText('La cerveza del momento',
+                                        margin: const EdgeInsets.fromLTRB(
+                                            0, 5, 0, 0),
+                                        child: AutoSizeText(
+                                            'La cerveza del momento',
                                             style: Theme.of(context)
                                                 .textTheme
                                                 .headline5,
@@ -122,11 +127,14 @@ class _HomePageState extends State<HomePage> {
                                               }
                                               return _beer != null
                                                   ? Padding(
-                                                    padding: const EdgeInsets.all(16.0),
-                                                    child: BeerCard(
-                                                        beer: _beer!,
-                                                        accessToken: accessToken!),
-                                                  )
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              16.0),
+                                                      child: BeerCard(
+                                                          beer: _beer!,
+                                                          accessToken:
+                                                              accessToken!),
+                                                    )
                                                   : const Padding(
                                                       padding:
                                                           EdgeInsets.all(8.0),
@@ -162,7 +170,8 @@ class _HomePageState extends State<HomePage> {
                                 child: Column(
                                   children: [
                                     Container(
-                                      margin: const EdgeInsets.fromLTRB(0, 5.0, 0, 0),
+                                      margin: const EdgeInsets.fromLTRB(
+                                          0, 5.0, 0, 0),
                                       child: AutoSizeText('El bar del momento',
                                           style: Theme.of(context)
                                               .textTheme
@@ -188,12 +197,14 @@ class _HomePageState extends State<HomePage> {
                                             }
                                             return _bar != null
                                                 ? Padding(
-                                                  padding: const EdgeInsets.all(16.0),
-                                                  child: BarCard(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            16.0),
+                                                    child: BarCard(
                                                       bar: _bar!,
                                                       accessToken: accessToken!,
                                                     ),
-                                                )
+                                                  )
                                                 : const Padding(
                                                     padding:
                                                         EdgeInsets.all(8.0),
@@ -217,7 +228,9 @@ class _HomePageState extends State<HomePage> {
 
   void _onSelectedMenu(String choice) {
     switch (choice) {
-      case 'Perfil':
+      case 'Cambiar tema':
+        _showThemeDialog();
+        break;
       case 'Cerrar sesión':
         RemoteApi.logoutAction();
         Navigator.of(context).pushReplacement(
@@ -230,4 +243,6 @@ class _HomePageState extends State<HomePage> {
     user = await _secureStorage.read(key: 'username');
     accessToken = await _secureStorage.read(key: 'access_token');
   }
+
+  void _showThemeDialog() {}
 }
