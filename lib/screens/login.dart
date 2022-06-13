@@ -30,12 +30,12 @@ class _LoginState extends State<Login> {
 
   @override
   void initState() {
+    super.initState();
     _secureStorage = const FlutterSecureStorage();
     //debugStorage();
     _usernameController = TextEditingController();
     _passwordController = TextEditingController();
     _checkToken();
-    super.initState();
   }
 
   //Para borrar a elección los tokens guardados.
@@ -59,11 +59,11 @@ class _LoginState extends State<Login> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Text('lappenultima',
-                              style: Theme.of(context).textTheme.headline1,
+                              style: Theme.of(context).textTheme.headline2,
                               textAlign: TextAlign.center),
                           const SizedBox(height: 12),
                           Text('Logueate',
-                              style: Theme.of(context).textTheme.headline2,
+                              style: Theme.of(context).textTheme.headline3,
                               textAlign: TextAlign.center),
                           const SizedBox(height: 12),
                           TextField(
@@ -129,7 +129,7 @@ class _LoginState extends State<Login> {
                                   child: Text(
                                     'Regístrate',
                                     style:
-                                        Theme.of(context).textTheme.headline3,
+                                        Theme.of(context).textTheme.headline6,
                                     textAlign: TextAlign.center,
                                   ))
                             ],
@@ -167,6 +167,7 @@ class _LoginState extends State<Login> {
             key: 'access_token', value: mappedResponse['access_token']);
         await _secureStorage.write(
             key: 'refresh_token', value: mappedResponse['refresh_token']);
+        await _secureStorage.write(key: 'username', value: username);
         Future.sync(() => Navigator.pushReplacement(
             context,
             MaterialPageRoute<void>(
@@ -245,6 +246,8 @@ class _LoginState extends State<Login> {
       Map<String, dynamic> mappedResponse =
           jsonDecode(await response.stream.bytesToString())[0];
       await _secureStorage.write(key: 'user_id', value: mappedResponse['id']);
+      await _secureStorage.write(
+          key: 'username', value: _usernameController.text);
       print(mappedResponse['id']);
       Future.sync(() => Navigator.pushReplacement(
           context,
@@ -281,6 +284,8 @@ class _LoginState extends State<Login> {
           key: 'access_token', value: mappedResponse['access_token']);
       await _secureStorage.write(
           key: 'refresh_token', value: mappedResponse['refresh_token']);
+      await _secureStorage.write(
+          key: 'username', value: _usernameController.text);
       Future.sync(() => Navigator.pushReplacement(
           context,
           MaterialPageRoute<void>(

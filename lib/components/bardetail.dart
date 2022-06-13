@@ -58,19 +58,23 @@ class _BarDetailState extends State<BarDetail> {
                   padding: const EdgeInsets.only(top: 10),
                   child: Text(
                     widget.bar.name,
+                    textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.headline2,
                   ),
                 ),
                 const Divider(height: 30),
-                widget.bar.image != null
-                    ? CachedNetworkImage(
-                        imageUrl:
-                            '${constants.ip}/rest/files?fileRef=${widget.bar.image}&access_token=${widget.accessToken}',
-                        width: 125)
-                    : CachedNetworkImage(
-                        imageUrl: 'http://via.placeholder.com/275x200',
-                        fit: BoxFit.scaleDown),
-                const Divider(height: 15),
+                Material(
+                  elevation: 2.0,
+                  child: widget.bar.image != null
+                      ? CachedNetworkImage(
+                          imageUrl:
+                              '${constants.ip}/rest/files?fileRef=${widget.bar.image}&access_token=${widget.accessToken}',
+                          width: 250)
+                      : CachedNetworkImage(
+                          imageUrl: 'http://via.placeholder.com/275x200',
+                          fit: BoxFit.scaleDown),
+                ),
+                const Divider(height: 30),
                 Column(
                     mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -279,7 +283,7 @@ class _BarDetailState extends State<BarDetail> {
                                         return BeerCard(
                                             beer: widget.bar.beers![index],
                                             accessToken: widget.accessToken,
-                                            width: 175);
+                                            width: 150);
                                       },
                                     ),
                                   ),
@@ -308,7 +312,12 @@ class _BarDetailState extends State<BarDetail> {
   void _handleRating() {
     _rated != true
         ? _showRatingDialog(widget.bar.id)
-        : RemoteApi.deleteBarRating(widget.bar.id);
+        : () {
+            RemoteApi.deleteBarRating(widget.bar.id);
+            setState(() {
+              _rating = 0;
+            });
+          }();
     setState(() {
       _rated = !_rated;
     });
@@ -317,18 +326,23 @@ class _BarDetailState extends State<BarDetail> {
   void _showRatingDialog(int bar) {
     final ratingDialog = RatingDialog(
         title: Text(
-          'Rate ${widget.bar.name}',
+          'Puntúa ${widget.bar.name}',
           textAlign: TextAlign.center,
         ),
         initialRating: 1,
-        submitButtonText: 'Rate',
-        commentHint: 'Give us your opinion!',
-        onSubmitted: (response) => RemoteApi.postBarRating(
-            bar, response.rating.round(), response.comment));
+        submitButtonText: 'Puntúa',
+        commentHint: '¡Dános tu opinión!',
+        onSubmitted: (response) {
+          RemoteApi.postBarRating(
+              bar, response.rating.round(), response.comment);
+          setState(() {
+            _rating = response.rating.round();
+          });
+        });
 
     showDialog(
       context: context,
-      barrierDismissible: true,
+      barrierDismissible: false,
       builder: (context) => ratingDialog,
     );
   }

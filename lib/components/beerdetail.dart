@@ -64,6 +64,7 @@ class _BeerDetailState extends State<BeerDetail> {
               Padding(
                 padding: const EdgeInsets.only(top: 10),
                 child: Text(widget.beer.name,
+                    textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.headline2),
               ),
               const Divider(height: 30),
@@ -336,7 +337,12 @@ class _BeerDetailState extends State<BeerDetail> {
   void _handleRating() {
     _rated != true
         ? _showRatingDialog(widget.beer.id)
-        : RemoteApi.deleteBeerRating(widget.beer.id);
+        : () {
+            RemoteApi.deleteBeerRating(widget.beer.id);
+            setState(() {
+              _rating = 0;
+            });
+          }();
     setState(() {
       _rated = !_rated;
     });
@@ -345,18 +351,23 @@ class _BeerDetailState extends State<BeerDetail> {
   void _showRatingDialog(int beer) {
     final ratingDialog = RatingDialog(
         title: Text(
-          'Rate ${widget.beer.name}',
+          'Puntúa ${widget.beer.name}',
           textAlign: TextAlign.center,
         ),
         initialRating: 1,
-        submitButtonText: 'Rate',
-        commentHint: 'Give us your opinion!',
-        onSubmitted: (response) => RemoteApi.postBeerRating(
-            beer, response.rating.round(), response.comment));
+        submitButtonText: 'Puntúa',
+        commentHint: '¡Dános tu opinión!',
+        onSubmitted: (response) {
+          RemoteApi.postBeerRating(
+              beer, response.rating.round(), response.comment);
+          setState(() {
+            _rating = response.rating.round();
+          });
+        });
 
     showDialog(
       context: context,
-      barrierDismissible: true,
+      barrierDismissible: false,
       builder: (context) => ratingDialog,
     );
   }

@@ -40,45 +40,44 @@ class _BarCardState extends State<BarCard> {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      borderRadius: const BorderRadius.all(Radius.circular(10.0)),
-      clipBehavior: Clip.antiAlias,
+    return Card(
+      elevation: 1,
       child: GestureDetector(
         onTap: () => Navigator.of(context).push(PageTransition(
             type: PageTransitionType.fade,
             child:
                 BarDetail(bar: widget.bar, accessToken: widget.accessToken))),
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(10, 12.5, 10, 7.5),
-            child: Container(
-                padding: const EdgeInsets.all(16),
-                constraints: BoxConstraints.expand(
-                    width: widget.width, height: widget.height),
-                decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        stops: [
-                          0,
-                          0.5,
-                          1
-                        ],
-                        colors: [
-                          Colors.deepOrange,
-                          Colors.orange,
-                          Colors.yellow
-                        ]),
-                    borderRadius: BorderRadius.all(Radius.circular(12.0))),
-                child: Stack(
-                  children: [
-                    Positioned(
-                        bottom: 5,
-                        right: 15,
+          child: Container(
+              padding: const EdgeInsets.all(16),
+              constraints: BoxConstraints.expand(
+                  width: widget.width, height: widget.height),
+              decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      stops: const [
+                        0,
+                        1
+                      ],
+                      colors: [
+                        Theme.of(context).colorScheme.primaryContainer,
+                        Theme.of(context).colorScheme.secondaryContainer
+                      ]),
+                  borderRadius: const BorderRadius.all(Radius.circular(12.0))),
+              child: Stack(
+                children: [
+                  Positioned(
+                      bottom: 15,
+                      right: 15,
+                      child: Material(
+                        elevation: 4.0,
                         child: Container(
                           width: 250,
-                          decoration:
-                              BoxDecoration(border: Border.all(width: 1)),
+                          height: 160,
+                          decoration: BoxDecoration(
+                              border:
+                                  Border.all(width: 1, color: Colors.black45)),
                           child: widget.bar.image != null
                               ? CachedNetworkImage(
                                   imageUrl:
@@ -89,55 +88,103 @@ class _BarCardState extends State<BarCard> {
                                   imageUrl:
                                       'http://via.placeholder.com/250x160',
                                   fit: BoxFit.scaleDown),
-                        )),
-                    Positioned(
-                        child: AutoSizeText(widget.bar.name, minFontSize: 24)),
-                    Positioned(
-                        top: 35,
-                        child: AutoSizeText(widget.bar.iDBarType?.name ?? '',
-                            minFontSize: 18)),
-                    Positioned(
-                        top: 65,
-                        child: SizedBox(
-                            width: 150,
-                            child: AutoSizeText(
-                              widget.bar.description ?? '',
-                              minFontSize: 14,
-                              style:
-                                  const TextStyle(fontStyle: FontStyle.italic),
-                              wrapWords: true,
-                            ))),
-                    Positioned(
-                        bottom: 5,
-                        child: FutureBuilder(
-                            future: _futureFav,
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const CircularProgressIndicator();
-                              } else if (snapshot.connectionState ==
-                                  ConnectionState.done) {
-                                if (snapshot.hasData) {
-                                  if (firstLoad) {
-                                    _fav = snapshot.data as bool? ?? false;
-                                    firstLoad = false;
-                                  }
-                                  return IconButton(
-                                    icon: Icon(
-                                      _fav == true
-                                          ? Icons.favorite
-                                          : Icons.favorite_border_outlined,
-                                      size: 40,
-                                    ),
-                                    onPressed: _handleFav,
-                                  );
+                        ),
+                      )),
+                  Positioned(
+                      child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(2.0, 0, 0, 0),
+                          child: AutoSizeText(
+                            widget.bar.name,
+                            minFontSize: 24,
+                            style: TextStyle(shadows: [
+                              Shadow(
+                                  offset: const Offset(-1, -1),
+                                  color:
+                                      Theme.of(context).colorScheme.onPrimary,
+                                  blurRadius: 8.0),
+                              Shadow(
+                                  offset: const Offset(1, -1),
+                                  color:
+                                      Theme.of(context).colorScheme.onPrimary,
+                                  blurRadius: 8.0),
+                              Shadow(
+                                  offset: const Offset(-1, 1),
+                                  color:
+                                      Theme.of(context).colorScheme.onPrimary,
+                                  blurRadius: 8.0),
+                              Shadow(
+                                  offset: const Offset(1, 1),
+                                  color:
+                                      Theme.of(context).colorScheme.onPrimary,
+                                  blurRadius: 8.0),
+                            ]),
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(2.0, 0, 0, 0),
+                          child: AutoSizeText(
+                            widget.bar.iDBarType?.name ?? '',
+                            minFontSize: 18,
+                            style: TextStyle(shadows: [
+                              Shadow(
+                                  offset: const Offset(-1, -1),
+                                  color:
+                                      Theme.of(context).colorScheme.onPrimary,
+                                  blurRadius: 8.0),
+                              Shadow(
+                                  offset: const Offset(1, -1),
+                                  color:
+                                      Theme.of(context).colorScheme.onPrimary,
+                                  blurRadius: 8.0),
+                              Shadow(
+                                  offset: const Offset(-1, 1),
+                                  color:
+                                      Theme.of(context).colorScheme.onPrimary,
+                                  blurRadius: 8.0),
+                              Shadow(
+                                  offset: const Offset(1, 1),
+                                  color:
+                                      Theme.of(context).colorScheme.onPrimary,
+                                  blurRadius: 8.0),
+                            ]),
+                          ),
+                        )
+                      ])),
+                  Positioned(
+                      bottom: 5,
+                      child: FutureBuilder(
+                          future: _futureFav,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const CircularProgressIndicator();
+                            } else if (snapshot.connectionState ==
+                                ConnectionState.done) {
+                              if (snapshot.hasData) {
+                                if (firstLoad) {
+                                  _fav = snapshot.data as bool? ?? false;
+                                  firstLoad = false;
                                 }
+                                return IconButton(
+                                  icon: Icon(
+                                    _fav == true
+                                        ? Icons.favorite
+                                        : Icons.favorite_border_outlined,
+                                    size: 40,
+                                  ),
+                                  onPressed: _handleFav,
+                                );
                               }
-                              return const Icon(Icons.error, size: 40);
-                            }))
-                  ],
-                )),
-          ),
+                            }
+                            return const Icon(Icons.error, size: 40);
+                          }))
+                ],
+              )),
         ),
       ),
     );

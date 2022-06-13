@@ -57,15 +57,15 @@ class _RootPageState extends State<RootPage> {
           BottomNavigationBarItem(
               icon: Icon(Icons.home_outlined),
               activeIcon: Icon(Icons.home),
-              label: 'Home'),
+              label: 'Inicio'),
           BottomNavigationBarItem(
-              icon: Icon(Icons.wine_bar_outlined),
-              activeIcon: Icon(Icons.wine_bar),
-              label: 'Beers'),
+              icon: Icon(Icons.sports_bar_outlined),
+              activeIcon: Icon(Icons.sports_bar),
+              label: 'Cervezas'),
           BottomNavigationBarItem(
-              icon: Icon(Icons.map_outlined),
-              activeIcon: Icon(Icons.map),
-              label: 'Bars')
+              icon: Icon(Icons.table_bar_outlined),
+              activeIcon: Icon(Icons.table_bar),
+              label: 'Bares')
         ],
       ),
     );

@@ -23,7 +23,7 @@ class _BarsPageState extends State<BarsPage> {
 
   String? _accessToken;
 
-  static const _pageSize = 10;
+  static const _pageSize = 20;
   final PagingController<int, Bar> _pagingController =
       PagingController(firstPageKey: 0);
 
@@ -58,12 +58,12 @@ class _BarsPageState extends State<BarsPage> {
     return Scaffold(
         appBar: AppBar(
           title: !_isSearching
-              ? const Text('Bars')
+              ? const Text('Bares')
               : TextField(
                   controller: _searchController,
                   onChanged: _updateSearchTerm,
                   decoration: const InputDecoration(
-                      icon: Icon(Icons.search), hintText: 'Search bar'),
+                      icon: Icon(Icons.search), hintText: 'Buscar bar'),
                 ),
           actions: <Widget>[
             Padding(
@@ -85,30 +85,33 @@ class _BarsPageState extends State<BarsPage> {
         ),
         body: RefreshIndicator(
           onRefresh: () => Future.sync(() => _pagingController.refresh()),
-          child: Center(
-            child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(
-                      child: PagedGridView(
-                          pagingController: _pagingController,
-                          gridDelegate: SliverWovenGridDelegate.count(
-                            crossAxisCount: 1,
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 6,
-                            pattern: [
-                              const WovenGridTile(1.25,
-                                  crossAxisRatio: 1,
-                                  alignment: AlignmentDirectional(0.75, 0)),
-                            ],
-                          ),
-                          builderDelegate: PagedChildBuilderDelegate<Bar>(
-                              itemBuilder: (context, item, index) {
-                            return BarCard(
-                                bar: item, accessToken: _accessToken!);
-                          })))
-                ]),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(8.0, 6.0, 8.0, 4.0),
+            child: Center(
+              child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                        child: PagedGridView(
+                            pagingController: _pagingController,
+                            gridDelegate: SliverWovenGridDelegate.count(
+                              crossAxisCount: 1,
+                              crossAxisSpacing: 12,
+                              mainAxisSpacing: 6,
+                              pattern: [
+                                const WovenGridTile(1.35,
+                                    crossAxisRatio: 1,
+                                    alignment: AlignmentDirectional(0.75, 0)),
+                              ],
+                            ),
+                            builderDelegate: PagedChildBuilderDelegate<Bar>(
+                                itemBuilder: (context, item, index) {
+                              return BarCard(
+                                  bar: item, accessToken: _accessToken!);
+                            })))
+                  ]),
+            ),
           ),
         ));
   }

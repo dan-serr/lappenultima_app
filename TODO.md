@@ -1,24 +1,3 @@
 ## TODO
 
-- Poner en beer detail lista de bares en la que se encuentra ¿request y query?
-- Poner en bar detail lista de cervezas
-- ¿Posible nueva card para estas vistas?
-
-
-
----- REQUEST BODY DE INSERT EN RATING
-
-{
-"id": {
-"iDUser": "8ed80b94-bfba-873b-c685-1a1f1bfc6378",
-"iDBeer": 2
-},
-"iDUser": {
-"id": "8ed80b94-bfba-873b-c685-1a1f1bfc6378"
-},
-"iDBeer": {
-"id": 2
-},
-"rating": 2,
-"opinion": "good"
-}
+NAVIGATOR LOOP ?? ?? ?? 

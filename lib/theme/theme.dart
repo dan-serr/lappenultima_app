@@ -1,51 +1,48 @@
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-//TODO REVAMP THEME DATA
 class AppenultimaTheme {
-  static TextTheme lightTextTheme = TextTheme(
-    bodyText1: GoogleFonts.roboto(
-        fontSize: 14.0, fontWeight: FontWeight.w600, color: Colors.black),
-    bodyText2: GoogleFonts.roboto(
-        fontSize: 14.0, fontWeight: FontWeight.w700, color: Colors.black),
-    headline1: GoogleFonts.roboto(
-        fontSize: 32.0, fontWeight: FontWeight.bold, color: Colors.black),
-    headline2: GoogleFonts.roboto(
-        fontSize: 21.0, fontWeight: FontWeight.w700, color: Colors.black),
-    headline3: GoogleFonts.roboto(
-        fontSize: 16.0, fontWeight: FontWeight.w600, color: Colors.black),
-    headline6: GoogleFonts.roboto(
-        fontSize: 20.0, fontWeight: FontWeight.w600, color: Colors.black),
-  );
-
-  static TextTheme darkTextTheme = TextTheme(
-    bodyText1: GoogleFonts.roboto(
-        fontSize: 14.0, fontWeight: FontWeight.w600, color: Colors.white),
-    bodyText2: GoogleFonts.roboto(
-        fontSize: 14.0, fontWeight: FontWeight.w700, color: Colors.white),
-    headline1: GoogleFonts.roboto(
-        fontSize: 32.0, fontWeight: FontWeight.bold, color: Colors.white),
-    headline2: GoogleFonts.roboto(
-        fontSize: 21.0, fontWeight: FontWeight.w700, color: Colors.white),
-    headline3: GoogleFonts.roboto(
-        fontSize: 16.0, fontWeight: FontWeight.w600, color: Colors.white),
-    headline6: GoogleFonts.roboto(
-        fontSize: 20.0, fontWeight: FontWeight.w600, color: Colors.white),
-  );
-
   static ThemeData light() {
-    return ThemeData(
-      brightness: Brightness.light,
-      primarySwatch: Colors.orange,
-      textTheme: lightTextTheme,
-    );
+    return FlexThemeData.light(
+        scheme: FlexScheme.espresso,
+        usedColors: 4,
+        surfaceMode: FlexSurfaceMode.highScaffoldLowSurface,
+        blendLevel: 20,
+        appBarOpacity: 0.95,
+        subThemesData: const FlexSubThemesData(
+          blendOnLevel: 20,
+          blendOnColors: false,
+          inputDecoratorBorderType: FlexInputBorderType.underline,
+          inputDecoratorRadius: 8.0,
+          inputDecoratorUnfocusedHasBorder: false,
+        ),
+        useMaterial3ErrorColors: true,
+        visualDensity: FlexColorScheme.comfortablePlatformDensity,
+        useMaterial3: true,
+        fontFamily: GoogleFonts.notoSans().fontFamily);
   }
 
   static ThemeData dark() {
-    return ThemeData(
-      brightness: Brightness.dark,
-      primarySwatch: Colors.deepOrange,
-      textTheme: darkTextTheme,
+    return FlexThemeData.dark(
+      scheme: FlexScheme.espresso,
+      usedColors: 4,
+      surfaceMode: FlexSurfaceMode.highScaffoldLowSurfacesVariantDialog,
+      blendLevel: 15,
+      appBarStyle: FlexAppBarStyle.surface,
+      appBarOpacity: 0.90,
+      appBarElevation: 1.0,
+      swapColors: true,
+      subThemesData: const FlexSubThemesData(
+        blendOnLevel: 30,
+        inputDecoratorBorderType: FlexInputBorderType.underline,
+        inputDecoratorRadius: 8.0,
+        inputDecoratorUnfocusedHasBorder: false,
+      ),
+      useMaterial3ErrorColors: true,
+      visualDensity: FlexColorScheme.comfortablePlatformDensity,
+      useMaterial3: true,
+      fontFamily: GoogleFonts.notoSans().fontFamily,
     );
   }
 }

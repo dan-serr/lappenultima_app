@@ -11,6 +11,7 @@ import '../models/bar.dart';
 class RemoteApi {
   static const FlutterSecureStorage _secureStorage = FlutterSecureStorage();
 
+  //Fetchs para paginador
   static Future<List<Beer>> fetchBeers(int offset, int size,
       [String? searchTerm]) async {
     String? accessToken = await _secureStorage.read(key: 'access_token');
@@ -67,6 +68,7 @@ class RemoteApi {
     }
   }
 
+  //Beers
   static Future<bool> isBeerFav(int beer) async {
     String? accessToken = await _secureStorage.read(key: 'access_token');
     String? user = await _secureStorage.read(key: 'user_id');
@@ -205,6 +207,26 @@ class RemoteApi {
     print(await response.stream.bytesToString());
   }
 
+  static Future<Beer?> getBeerMostRated() async {
+    String? accessToken = await _secureStorage.read(key: 'access_token');
+    var headers = {
+      'Authorization': 'Bearer $accessToken',
+      //'Cookie': 'SESSION=MDY3Y2IzNmMtMGEyNC00YWM0LTk3NjEtZTBkNDdmZjBlNzFk'
+    };
+    var request =
+        http.Request('GET', Uri.parse('${constants.ip}/rating/beer/mostRated'));
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      return Beer.fromJson(jsonDecode(await response.stream.bytesToString()));
+    }
+    return null;
+  }
+
+  //Bars
   static Future<bool> isBarFav(int bar) async {
     String? accessToken = await _secureStorage.read(key: 'access_token');
     String? user = await _secureStorage.read(key: 'user_id');
@@ -347,7 +369,7 @@ class RemoteApi {
   }
 
   static void logoutAction() async {
-    await _secureStorage.delete(key: 'user_id');
+    //await _secureStorage.delete(key: 'user_id'); //No se borra para evitar que se quede a null: que se sobrescriba cuando entre uno nuevo TO FIX
     await _secureStorage.delete(key: 'access_token');
     await _secureStorage.delete(key: 'refresh_token');
   }
@@ -375,5 +397,24 @@ class RemoteApi {
     } else {
       return <Bar>[];
     }
+  }
+
+  static Future<Bar?> getBarMostRated() async {
+    String? accessToken = await _secureStorage.read(key: 'access_token');
+    var headers = {
+      'Authorization': 'Bearer $accessToken',
+      //'Cookie': 'SESSION=MDY3Y2IzNmMtMGEyNC00YWM0LTk3NjEtZTBkNDdmZjBlNzFk'
+    };
+    var request =
+        http.Request('GET', Uri.parse('${constants.ip}/rating/bar/mostRated'));
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      return Bar.fromJson(jsonDecode(await response.stream.bytesToString()));
+    }
+    return null;
   }
 }

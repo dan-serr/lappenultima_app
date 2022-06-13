@@ -25,7 +25,7 @@ class _BeersPageState extends State<BeersPage> {
 
   String? _accessToken;
 
-  static const _pageSize = 5;
+  static const _pageSize = 6;
   final PagingController<int, Beer> _pagingController =
       PagingController(firstPageKey: 0);
 
@@ -60,12 +60,12 @@ class _BeersPageState extends State<BeersPage> {
     return Scaffold(
         appBar: AppBar(
             title: !_isSearching
-                ? const Text('Beers')
+                ? const Text('Cervezas')
                 : TextField(
                     controller: _searchController,
                     onChanged: _updateSearchTerm,
                     decoration: const InputDecoration(
-                        icon: Icon(Icons.search), hintText: 'Search beer'),
+                        icon: Icon(Icons.search), hintText: 'Buscar cerveza'),
                   ),
             actions: <Widget>[
               Padding(
@@ -94,16 +94,12 @@ class _BeersPageState extends State<BeersPage> {
                   Expanded(
                       child: PagedGridView(
                           pagingController: _pagingController,
-                          gridDelegate: SliverWovenGridDelegate.count(
-                            crossAxisCount: 1,
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 6,
-                            pattern: [
-                              const WovenGridTile(1,
-                                  crossAxisRatio: 0.75,
-                                  alignment: AlignmentDirectional(0.75, 0)),
-                            ],
-                          ),
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  crossAxisSpacing: 6,
+                                  mainAxisSpacing: 3,
+                                  childAspectRatio: 100 / 150),
                           builderDelegate: PagedChildBuilderDelegate<Beer>(
                               itemBuilder: (context, item, index) {
                             return BeerCard(
