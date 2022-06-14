@@ -190,10 +190,9 @@ class _LoginState extends State<Login> {
       _isBusy = false;
     });
   }
-
-  _passwordForgotten() {
-    //TODO Reenviar un email con la pass (no está controlado en la API yet)
-  }
+/*//TODO Reenviar un email con la pass (no está controlado en la API yet)
+  _passwordForgotten() {}
+ */
 
   String? get _userErrorText {
     final text = _usernameController.text;

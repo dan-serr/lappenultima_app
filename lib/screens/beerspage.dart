@@ -1,12 +1,8 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:lappenultima_app/components/beercard.dart';
 import 'package:lappenultima_app/models/beer.dart';
-import 'package:http/http.dart' as http;
 import 'package:lappenultima_app/models/beertype.dart';
 import 'package:lappenultima_app/util/remoteapi.dart';
 
