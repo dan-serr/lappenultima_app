@@ -20,7 +20,7 @@ class AppenultimaTheme {
         useMaterial3ErrorColors: true,
         visualDensity: FlexColorScheme.comfortablePlatformDensity,
         useMaterial3: true,
-        fontFamily: GoogleFonts.notoSans().fontFamily);
+        fontFamily: GoogleFonts.roboto().fontFamily);
   }
 
   static ThemeData dark() {
@@ -42,7 +42,7 @@ class AppenultimaTheme {
       useMaterial3ErrorColors: true,
       visualDensity: FlexColorScheme.comfortablePlatformDensity,
       useMaterial3: true,
-      fontFamily: GoogleFonts.notoSans().fontFamily,
+      fontFamily: GoogleFonts.roboto().fontFamily,
     );
   }
 }

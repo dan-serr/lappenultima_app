@@ -135,16 +135,18 @@ class _HomePageState extends State<HomePage> {
                                                           accessToken:
                                                               accessToken!),
                                                     )
-                                                  : const Padding(
+                                                  : Padding(
                                                       padding:
-                                                          EdgeInsets.all(8.0),
-                                                      child: Placeholder(),
-                                                    ); //todo placeholder asset
+                                                          const EdgeInsets.all(
+                                                              8.0),
+                                                      child: Image.asset(
+                                                          "assets/beer_placeholder.png"));
                                             }
                                           }
-                                          return const Icon(Icons.error,
-                                              size:
-                                                  40); //TODO placeholder asset
+                                          return Icon(Icons.error,
+                                              color:
+                                                  Theme.of(context).errorColor,
+                                              size: 40);
                                         },
                                       ),
                                     ])))),
@@ -205,15 +207,18 @@ class _HomePageState extends State<HomePage> {
                                                       accessToken: accessToken!,
                                                     ),
                                                   )
-                                                : const Padding(
+                                                : Padding(
                                                     padding:
-                                                        EdgeInsets.all(8.0),
-                                                    child: Placeholder(),
-                                                  ); //todo placeholder asset
+                                                        const EdgeInsets.all(
+                                                            8.0),
+                                                    child: Image.asset(
+                                                        "assets/bar_placeholder.jpg"),
+                                                  );
                                           }
                                         }
-                                        return const Icon(Icons.error,
-                                            size: 40); //TODO placeholder asset
+                                        return Icon(Icons.error,
+                                            color: Theme.of(context).errorColor,
+                                            size: 40);
                                       },
                                     )
                                   ],

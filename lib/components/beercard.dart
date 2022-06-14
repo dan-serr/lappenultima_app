@@ -80,8 +80,7 @@ class _BeerCardState extends State<BeerCard> {
                                   '${constants.ip}/rest/files?fileRef=${widget.beer.image}&access_token=${widget.accessToken}',
                               width: 115,
                               fit: BoxFit.fitHeight)
-                          : CachedNetworkImage(
-                              imageUrl: 'http://via.placeholder.com/125x250',
+                          : Image.asset('assets/beer_placeholder.png',
                               fit: BoxFit.scaleDown),
                     ),
                   ),

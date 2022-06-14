@@ -32,10 +32,10 @@ class _LoginState extends State<Login> {
   void initState() {
     super.initState();
     _secureStorage = const FlutterSecureStorage();
+    _checkToken();
     //debugStorage();
     _usernameController = TextEditingController();
     _passwordController = TextEditingController();
-    _checkToken();
   }
 
   //Para borrar a elección los tokens guardados.

@@ -84,9 +84,7 @@ class _BarCardState extends State<BarCard> {
                                       '${constants.ip}/rest/files?fileRef=${widget.bar.image}&access_token=${widget.accessToken}',
                                   width: 115,
                                   fit: BoxFit.fitWidth)
-                              : CachedNetworkImage(
-                                  imageUrl:
-                                      'http://via.placeholder.com/250x160',
+                              : Image.asset('assets/bar_placeholder.jpg',
                                   fit: BoxFit.scaleDown),
                         ),
                       )),
@@ -181,7 +179,8 @@ class _BarCardState extends State<BarCard> {
                                 );
                               }
                             }
-                            return const Icon(Icons.error, size: 40);
+                            return Icon(Icons.error,
+                                size: 40, color: Theme.of(context).errorColor);
                           }))
                 ],
               )),
