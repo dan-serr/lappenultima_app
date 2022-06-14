@@ -247,7 +247,11 @@ class RemoteApi {
     http.StreamedResponse response = await request.send();
 
     if (response.statusCode == 200) {
-      return int.parse(await response.stream.bytesToString());
+      try {
+        return int.parse(await response.stream.bytesToString());
+      } catch (error) {
+        return null;
+      }
     }
     return null;
   }
@@ -297,6 +301,7 @@ class RemoteApi {
           jsonDecode(await response.stream.bytesToString());
       List<Beer> beers =
           List<Beer>.from(iterable.map((model) => Beer.fromJson(model)));
+      return beers;
     }
     return <Beer>[];
   }
@@ -558,8 +563,9 @@ class RemoteApi {
     if (response.statusCode == 200) {
       List<dynamic> iterable =
           jsonDecode(await response.stream.bytesToString());
-      List<Beer> beers =
-          List<Beer>.from(iterable.map((model) => Beer.fromJson(model)));
+      List<Bar> bars =
+          List<Bar>.from(iterable.map((model) => Bar.fromJson(model)));
+      return bars;
     }
     return <Bar>[];
   }

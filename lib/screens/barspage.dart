@@ -174,8 +174,8 @@ class _BarsPageState extends State<BarsPage> {
                                     _pagingController.itemList =
                                         _pagingController.itemList
                                             ?.where((element) =>
-                                                element.iDBarType!.id ==
-                                                _barTypeFilter!.id)
+                                                element.iDBarType?.id ==
+                                                _barTypeFilter?.id)
                                             .toList();
                                   }
                                   Navigator.of(context).pop();
@@ -189,7 +189,11 @@ class _BarsPageState extends State<BarsPage> {
                           );
                         }
                       }
-                      return const Icon(Icons.error, size: 40);
+                      return Icon(
+                        Icons.error,
+                        size: 40,
+                        color: Theme.of(context).errorColor,
+                      );
                     })),
           );
         });

@@ -166,8 +166,8 @@ class _BeersPageState extends State<BeersPage> {
                                     _pagingController.itemList =
                                         _pagingController.itemList
                                             ?.where((element) =>
-                                                element.iDBeerType!.id ==
-                                                _beerTypeFilter!.id)
+                                                element.iDBeerType?.id ==
+                                                _beerTypeFilter?.id)
                                             .toList();
                                   }
                                   Navigator.of(context).pop();
@@ -180,7 +180,11 @@ class _BeersPageState extends State<BeersPage> {
                             });
                       }
                     }
-                    return const Icon(Icons.error, size: 40);
+                    return Icon(
+                      Icons.error,
+                      size: 40,
+                      color: Theme.of(context).errorColor,
+                    );
                   }),
             ),
           );

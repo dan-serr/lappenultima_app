@@ -143,10 +143,14 @@ class _HomePageState extends State<HomePage> {
                                                           "assets/beer_placeholder.png"));
                                             }
                                           }
-                                          return Icon(Icons.error,
-                                              color:
-                                                  Theme.of(context).errorColor,
-                                              size: 40);
+                                          return Column(children: [
+                                            Icon(Icons.error,
+                                                color: Theme.of(context)
+                                                    .errorColor,
+                                                size: 40),
+                                            const Text(
+                                                'Error al encontrar la cerveza más votada.')
+                                          ]);
                                         },
                                       ),
                                     ])))),
@@ -216,9 +220,14 @@ class _HomePageState extends State<HomePage> {
                                                   );
                                           }
                                         }
-                                        return Icon(Icons.error,
-                                            color: Theme.of(context).errorColor,
-                                            size: 40);
+                                        return Column(children: [
+                                          Icon(Icons.error,
+                                              color: Theme.of(context)
+                                                  .errorColor,
+                                              size: 40),
+                                          const Text(
+                                              'Error al encontrar el bar más votado.')
+                                        ]);
                                       },
                                     )
                                   ],
