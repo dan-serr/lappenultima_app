@@ -175,6 +175,13 @@ class _LoginState extends State<Login> {
             )));
       } else {
         print(response.reasonPhrase);
+        Fluttertoast.showToast(
+            msg: 'Error al loguear, compruebe sus datos o regístrese.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: Colors.black45,
+            textColor: Theme.of(context).errorColor,
+            fontSize: 16.0);
       }
     } catch (e) {
       print('Error: ${e.toString()}');
@@ -350,9 +357,9 @@ class _RegisterState extends State<Register> {
             padding: const EdgeInsets.fromLTRB(8.0, 40.0, 8.0, 4.0),
             child: Center(
               child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
                     const Text('Rellena tus datos para registrarte',
                         style: TextStyle(fontSize: 20),
                         textAlign: TextAlign.center),
@@ -517,10 +524,10 @@ class _RegisterState extends State<Register> {
           msg:
               'Verifique su registro clickeando el enlace enviado a su correo.',
           toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.CENTER,
+          gravity: ToastGravity.BOTTOM,
           backgroundColor: Colors.black45,
-          textColor: Colors.lightGreen,
-          fontSize: 22.0);
+          textColor: Theme.of(context).primaryColor,
+          fontSize: 20.0);
       Future.delayed(const Duration(milliseconds: 2500), () {
         Navigator.pop(
             context,
@@ -532,9 +539,9 @@ class _RegisterState extends State<Register> {
       Fluttertoast.showToast(
           msg: 'Error al registrar, inténtelo más tarde.',
           toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
-          backgroundColor: Colors.white38,
-          textColor: Colors.redAccent,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.black45,
+          textColor: Theme.of(context).errorColor,
           fontSize: 16.0);
     } else {
       print(response.reasonPhrase);
