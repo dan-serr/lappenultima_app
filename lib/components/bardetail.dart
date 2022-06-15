@@ -1,6 +1,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:lappenultima_app/components/beercard.dart';
 import 'package:lappenultima_app/models/bar.dart';
 import 'package:lappenultima_app/util/constants.dart' as constants;
@@ -353,8 +354,14 @@ class _BarDetailState extends State<BarDetail> {
       olc.CodeArea ca = olc.decode(pluscode);
       Uri googleUrl = Uri.parse(
           'https://www.google.com/maps/@?api=1&map_action=map&center=${ca.center.latitude},${ca.center.longitude}');
-      if (await canLaunchUrl(googleUrl)) {
+      try {
         await launchUrl(googleUrl);
+      } catch (error) {
+        Fluttertoast.showToast(
+            msg: 'Ha habido un error abriendo el enlace.',
+            textColor: Theme.of(context).primaryColor,
+            gravity: ToastGravity.BOTTOM,
+            toastLength: Toast.LENGTH_SHORT);
       }
     }
   }
